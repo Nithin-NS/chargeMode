@@ -9,4 +9,10 @@ class ConnectorType extends Model
     protected $table = 'connectortype';
     protected $fillable=['Type','Remarks'];
     protected $guarded = ['id'];
+
+    public function CPConnector()
+    {
+        return $this->hasOne(CPConnector::class);
+    }
+
 }

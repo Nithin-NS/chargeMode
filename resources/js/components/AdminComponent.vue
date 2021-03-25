@@ -29,24 +29,23 @@ export default {
     mounted() {
         console.log("Admin Component  mounted.");
         this.listen();
-        // cp_id: this.cp_id;
     },
     methods: {
         listen() {
             Echo.channel("bootnotification").listen("BootNotification", e => {
                 this.data = e.data;
-                // this.cp_id = e.cp_id;
-                console.log(e.data.payload.chargePointModel);
-                //console.log(e.data.payload.chargeBoxSerialNumber);
                 this.checking();
             });
         },
         checking() {
             var title = this.data.title;
-            
+
             switch (title) {
                 case "BootNotificationRequest":
-                    console.log("BootNotification from " + this.data.payload.chargePointModel);
+                    console.log(
+                        "BootNotification from " +
+                            this.data.payload.chargePointModel
+                    );
                     this.BootNotificationResponse();
                     break;
                 case "Authorize":
@@ -54,43 +53,44 @@ export default {
                     this.AuthenticateResponse();
                     break;
                 case "StartTransactionRequest":
-                    console.log('StartTransaction');
+                    console.log("StartTransaction");
                     this.StartTransactionResponse();
                     break;
                 case "MeterValuesRequest":
-                    console.log('MeterValues');
+                    console.log("MeterValues");
                     this.MeterValues();
                     break;
                 case "HeartBeatRequest":
-                    console.log('HeartBeat');
+                    console.log("HeartBeat");
                     this.HeartBeat();
                     break;
                 case "StopTransactionRequest":
-                    console.log('StopTransaction');
+                    console.log("StopTransaction");
                     this.StopTransaction();
                     break;
                 default:
                     console.log("Not Working");
             }
         },
+
         BootNotificationResponse() {
             axios
                 .post("/sendBootNotificationResponce", {
-                    chargePointModel: this.data.payload.chargePointModel,
+                    chargePointModel: this.data.payload.chargePointModel
                 })
                 .then(
                     function(response) {
-                        // console.log(response);
-                        if(response.data == 'ok'){
-                            console.log('OK');
+                        if (response.data == "ok") {
+                            console.log("OK");
                         }
                     }.bind(this)
                 );
         },
+
         AuthenticateResponse() {
             axios
                 .post("/sendAuthenticateResponse", {
-                    idTag : this.data.payload.idTag,
+                    idTag: this.data.payload.idTag
                     // cp_id : this.data.cp_id,
                 })
                 .then(
@@ -98,12 +98,16 @@ export default {
                         //   this.connectors = response.data;
                     }.bind(this)
                 );
-            console.log('Authenticatedddddd');
+            console.log("Authenticated");
         },
+
         StartTransactionResponse() {
             axios
                 .post("/sendTransactionResponse", {
-                    status: "Rejected",
+                    idTag: this.data.payload.idTag,
+                    meterStart: this.data.payload.meterStart,
+                    chargepoint: this.data.payload.chargepoint,
+                    connectorId: this.data.payload.connectorId,
                     currenTime: "10.25",
                     interval: "2"
                 })
@@ -113,6 +117,7 @@ export default {
                     }.bind(this)
                 );
         },
+
         MeterValues() {
             axios
                 .post("/sendMeterValues", {
@@ -126,9 +131,10 @@ export default {
                     }.bind(this)
                 );
         },
+
         HeartBeat() {
             axios
-                .post("/sendHeartBeatRequest", {
+                .post("/sendHeartBeatResponce", {
                     status: "Rejected",
                     currenTime: "10.25",
                     interval: "2"
@@ -139,6 +145,7 @@ export default {
                     }.bind(this)
                 );
         },
+
         StopTransaction() {
             axios
                 .post("/sendStopTransaction", {

@@ -38,10 +38,16 @@ Route::get('/client', function () {
 });
 Route::post('/getBootNotification', [ClientController::class, 'bootNotification']);
 Route::post('/authenticate', [ClientController::class, 'authenticate']);
+Route::post('/startCharging', [ClientController::class, 'startCharging']);
+Route::post('/stopCharging', [ClientController::class, 'stopCharging']);
 
 //From Admin to Client
 Route::post('/sendBootNotificationResponce', [AdminNotificationController::class, 'BootNotificationResponce']);
 Route::post('/sendAuthenticateResponse', [AdminNotificationController::class, 'AuthenticateResponse']);
+Route::post('/sendTransactionResponse', [AdminNotificationController::class, 'TransactionResponse']);
+Route::post('/sendMeterValues', [AdminNotificationController::class, 'MeterValues']);
+Route::post('/sendHeartBeatResponce', [AdminNotificationController::class, 'HeartBeatResponce']);
+Route::post('/sendStopTransaction', [AdminNotificationController::class, 'StopTransaction']);
 
 
 //User Routes with authentication
@@ -67,9 +73,6 @@ Route::group(['middleware'=>['auth:admin']], function()
     })->name('admin.index');
     Route::get('/admin/dashboard', 'App\Http\Controllers\AdminController@index')->name('admin.dashboard');
 });
-
-
-
 //Autoload
 Route::get('/loader', function () {
     echo (new Loader\Load)->index();

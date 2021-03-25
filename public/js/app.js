@@ -1874,16 +1874,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     console.log("Admin Component  mounted.");
-    this.listen(); // cp_id: this.cp_id;
+    this.listen();
   },
   methods: {
     listen: function listen() {
       var _this = this;
 
       Echo.channel("bootnotification").listen("BootNotification", function (e) {
-        _this.data = e.data; // this.cp_id = e.cp_id;
-
-        console.log(e.data.payload.chargePointModel); //console.log(e.data.payload.chargeBoxSerialNumber);
+        _this.data = e.data;
 
         _this.checking();
       });
@@ -1903,22 +1901,22 @@ __webpack_require__.r(__webpack_exports__);
           break;
 
         case "StartTransactionRequest":
-          console.log('StartTransaction');
+          console.log("StartTransaction");
           this.StartTransactionResponse();
           break;
 
         case "MeterValuesRequest":
-          console.log('MeterValues');
+          console.log("MeterValues");
           this.MeterValues();
           break;
 
         case "HeartBeatRequest":
-          console.log('HeartBeat');
+          console.log("HeartBeat");
           this.HeartBeat();
           break;
 
         case "StopTransactionRequest":
-          console.log('StopTransaction');
+          console.log("StopTransaction");
           this.StopTransaction();
           break;
 
@@ -1930,9 +1928,8 @@ __webpack_require__.r(__webpack_exports__);
       axios.post("/sendBootNotificationResponce", {
         chargePointModel: this.data.payload.chargePointModel
       }).then(function (response) {
-        // console.log(response);
-        if (response.data == 'ok') {
-          console.log('OK');
+        if (response.data == "ok") {
+          console.log("OK");
         }
       }.bind(this));
     },
@@ -1942,11 +1939,14 @@ __webpack_require__.r(__webpack_exports__);
 
       }).then(function (response) {//   this.connectors = response.data;
       }.bind(this));
-      console.log('Authenticatedddddd');
+      console.log("Authenticated");
     },
     StartTransactionResponse: function StartTransactionResponse() {
       axios.post("/sendTransactionResponse", {
-        status: "Rejected",
+        idTag: this.data.payload.idTag,
+        meterStart: this.data.payload.meterStart,
+        chargepoint: this.data.payload.chargepoint,
+        connectorId: this.data.payload.connectorId,
         currenTime: "10.25",
         interval: "2"
       }).then(function (response) {//   this.connectors = response.data;
@@ -1961,7 +1961,7 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
     HeartBeat: function HeartBeat() {
-      axios.post("/sendHeartBeatRequest", {
+      axios.post("/sendHeartBeatResponce", {
         status: "Rejected",
         currenTime: "10.25",
         interval: "2"
@@ -2296,48 +2296,64 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //import func from 'vue-editor-bridge';
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       chargePoints: [],
-      select_cp: '',
-      key: '',
+      select_cp: "",
+      key: "",
       connectors: [],
-      select_connector: '',
-      select_cb_serial: '',
-      select_cp_serial: '',
+      select_connector: "",
+      select_cb_serial: "",
+      select_cp_serial: "",
       data: [],
       btnDisable: false,
       authbtn: true,
-      id_Tag: ''
+      startbtn: true,
+      stopbtn: true,
+      id_Tag: "",
+      msg: "",
+      beatInterval: "",
+      meterInterval: ""
     };
   },
   mounted: function mounted() {
-    // this.getChargepoints();
     this.listen();
   },
   methods: {
     listen: function listen() {
       var _this = this;
 
-      Echo.channel('bootnotificationresponce').listen('BootNotificationResponse', function (e) {
-        _this.data = JSON.parse(e.data);
-        console.log(_this.data.payload.status);
+      Echo.channel("bootnotificationresponce").listen("BootNotificationResponse", function (e) {
+        _this.data = JSON.parse(e.data); // console.log(this.data);
+        // console.log(this.data);
 
-        if (_this.data.payload.status == 'Accepted') {
-          _this.btnDisable = true;
-          _this.authbtn = false;
+        if (_this.data.payload.status == "Accepted") {
+          _this.btnDisable = true; //    this.authbtn = false;
         } else {}
       });
     },
     getChargepoints: function getChargepoints() {
-      axios.get('/getChargepoints').then(function (response) {
+      axios.get("/getChargepoints").then(function (response) {
         this.chargePoints = response.data; //   console.log(response.data);
       }.bind(this));
     },
     getConnectors: function getConnectors() {
-      axios.get('/getConnectors', {
+      axios.get("/getConnectors", {
         params: {
           cp_id: this.select_cp
         }
@@ -2346,20 +2362,84 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
     bootnotification: function bootnotification() {
-      axios.post('/getBootNotification', {
+      axios.post("/getBootNotification", {
         connector: this.select_connector,
         cp_id: this.select_cp,
         chargePointSerialNumber: this.select_cp_serial,
         chargeBoxSerialNumber: this.select_cb_serial
-      }).then(function (response) {//   this.connectors = response.data;
+      }).then(function (response) {
+        if (response.data == "success") {
+          console.log("Booting Success...");
+          this.authbtn = false;
+        } //   this.connectors = response.data;
+
       }.bind(this));
     },
     authenticate: function authenticate() {
-      axios.post('/authenticate', {
+      axios.post("/authenticate", {
+        id_tag: this.id_Tag,
+        cp_id: this.select_cp,
+        connector: this.select_connector
+      }).then(function (response) {
+        if (response.data == "success") {
+          console.log("Authenticated...");
+          this.authbtn = true;
+          this.startbtn = false;
+        } else {
+          console.log(response.data);
+        }
+      }.bind(this));
+    },
+    startCharging: function startCharging() {
+      axios.post("/startCharging", {
+        id_tag: this.id_Tag,
+        cp_id: this.select_cp,
+        connector: this.select_connector
+      }).then(function (response) {
+        if (response.data == "success") {
+          console.log("Transaction Started.....");
+          this.startbtn = true;
+          this.stopbtn = false;
+          this.interval(response.data);
+        }
+      }.bind(this));
+    },
+    stopCharging: function stopCharging() {
+      axios.post("/stopCharging", {
         id_tag: this.id_Tag,
         cp_id: this.select_cp
-      }).then(function (response) {//   this.connectors = response.data;
+      }).then(function (response) {
+        //   console.log(response.data);
+        if (response.data == "stop") {
+          console.log("Transaction Stoped.....");
+          this.interval(response.data);
+          this.stopbtn = true;
+          this.btnDisable = false;
+        }
       }.bind(this));
+    },
+    interval: function interval(msg) {
+      var _this2 = this;
+
+      if (msg == "success") {
+        console.log("Setting interval");
+        this.meterInterval = window.setInterval(function () {
+          _this2.meterValues();
+        }, 3000);
+        this.beatInterval = window.setInterval(function () {
+          _this2.heartBeat();
+        }, 3000);
+      } else {
+        console.log("Clearing Interval");
+        clearInterval(this.meterInterval);
+        clearInterval(this.beatInterval);
+      }
+    },
+    meterValues: function meterValues() {
+      console.log("meterValues");
+    },
+    heartBeat: function heartBeat() {
+      console.log("heartBeat");
     }
   },
   created: function created() {
@@ -44557,9 +44637,9 @@ var render = function() {
                   {
                     staticClass: "btn btn-primary",
                     attrs: {
+                      disabled: _vm.authbtn,
                       type: "submit",
-                      id: "auth",
-                      disabled: _vm.authbtn
+                      id: "auth"
                     },
                     on: {
                       click: function($event) {
@@ -44576,19 +44656,57 @@ var render = function() {
                 )
               ]),
               _vm._v(" "),
-              _vm._m(1)
+              _c("div", { staticClass: "col-3" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { disabled: _vm.startbtn, id: "start" },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.startCharging()
+                      }
+                    }
+                  },
+                  [
+                    _vm._v(
+                      "\n                                Start Charging\n                            "
+                    )
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    attrs: { disabled: _vm.stopbtn, id: "stop" },
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.stopCharging()
+                      }
+                    }
+                  },
+                  [
+                    _vm._v(
+                      "\n                                Stop Charging\n                            "
+                    )
+                  ]
+                )
+              ])
             ])
           ])
         ])
       ])
     ]),
     _vm._v(" "),
-    _vm._m(2),
+    _vm._m(1),
     _vm._v(" "),
     _c("div", { staticClass: "row" }, [
       _c("div", { staticClass: "col-6" }, [
         _c("div", { staticClass: "card" }, [
-          _vm._m(3),
+          _vm._m(2),
           _vm._v(" "),
           _c("div", { staticClass: "card-body" }, [
             _c(
@@ -44620,7 +44738,7 @@ var render = function() {
         ])
       ]),
       _vm._v(" "),
-      _vm._m(4)
+      _vm._m(3)
     ])
   ])
 }
@@ -44631,35 +44749,6 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("div", { staticClass: "row" }, [
       _c("div", { staticClass: "col-12" }, [_c("div", { staticClass: "card" })])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "col-3" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-primary",
-          attrs: { id: "start", disabled: "" }
-        },
-        [
-          _vm._v(
-            "\n                                Start Charging\n                            "
-          )
-        ]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        { staticClass: "btn btn-primary", attrs: { id: "stop", disabled: "" } },
-        [
-          _vm._v(
-            "\n                                Stop Charging\n                            "
-          )
-        ]
-      )
     ])
   },
   function() {

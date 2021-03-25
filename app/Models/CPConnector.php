@@ -8,5 +8,9 @@ class CPConnector extends Model
 {
     protected $table='cp_connector';
     protected $fillable=['cp_id','connector_type','status'];
-
+    
+    public function ConnectorType()
+    {
+        return $this->hasOne(ConnectorType::class);
+    }
 }

@@ -77,7 +77,8 @@
                             </div>
                         </div>
                         <div class="col-1">
-                            <button v-bind:disabled="btnDisable"
+                            <button
+                                v-bind:disabled="btnDisable"
                                 class="btn btn-primary btn-lg"
                                 id="boot"
                                 @click.prevent="bootnotification()"
@@ -118,22 +119,30 @@
                                 />
                             </div>
                             <div class="col-2">
-                                <button type="submit" class="btn btn-primary" id="auth" v-bind:disabled="authbtn" @click.prevent="authenticate()">
+                                <button
+                                    v-bind:disabled="authbtn"
+                                    type="submit"
+                                    class="btn btn-primary"
+                                    id="auth"
+                                    @click.prevent="authenticate()"
+                                >
                                     Authenticate
                                 </button>
                             </div>
                             <div class="col-3">
                                 <button
+                                    v-bind:disabled="startbtn"
                                     class="btn btn-primary"
                                     id="start"
-                                    disabled
+                                    @click.prevent="startCharging()"
                                 >
                                     Start Charging
                                 </button>
                                 <button
+                                    v-bind:disabled="stopbtn"
                                     class="btn btn-primary"
                                     id="stop"
-                                    disabled
+                                    @click.prevent="stopCharging()"
                                 >
                                     Stop Charging
                                 </button>
@@ -221,7 +230,11 @@
                         <ul style="height: 170px; overflow-y: scroll">
                             <div class="row">
                                 <div class="col-12">
-                                    <div id="request" class="req" style="margin-bottum:10px">
+                                    <div
+                                        id="request"
+                                        class="req"
+                                        style="margin-bottum:10px"
+                                    >
                                         {{ data }}
                                     </div>
                                 </div>
@@ -257,81 +270,174 @@
 @section('scripts')
 <script>
 //import func from 'vue-editor-bridge';
-    export default {
-        data: function(){
-            return {
-                chargePoints : [],
-                select_cp: '',
-                key : '',
-                connectors: [],
-                select_connector: '',
-                select_cb_serial: '',
-                select_cp_serial: '',
-                data : [],
-                btnDisable: false,
-                authbtn: true,
-                id_Tag: '',
-            }
+export default {
+    data: function() {
+        return {
+            chargePoints: [],
+            select_cp: "",
+            key: "",
+            connectors: [],
+            select_connector: "",
+            select_cb_serial: "",
+            select_cp_serial: "",
+            data: [],
+            btnDisable: false,
+            authbtn: true,
+            startbtn: true,
+            stopbtn: true,
+            id_Tag: "",
+            msg: "",
+            beatInterval: "",
+            meterInterval: ""
+        };
+    },
+    mounted() {
+        this.listen();
+    },
+    methods: {
+        listen() {
+            Echo.channel("bootnotificationresponce").listen(
+                "BootNotificationResponse",
+                e => {
+                    this.data = JSON.parse(e.data);
+                    // console.log(this.data);
+                    // console.log(this.data);
+                    if (this.data.payload.status == "Accepted") {
+                        this.btnDisable = true;
+                        //    this.authbtn = false;
+                    } else {
+                    }
+                }
+            );
         },
-        mounted() {
-            // this.getChargepoints();
-            this.listen();
-        },
-        methods: {
-            listen(){
-                Echo.channel('bootnotificationresponce')
-                    .listen('BootNotificationResponse', (e)=>{
-                         
-                        this.data = JSON.parse(e.data);
-                        console.log(this.data.payload.status); 
-                        if(this.data.payload.status == 'Accepted'){
-                           this.btnDisable = true;
-                           this.authbtn = false;
-                        }
-                        else{
-                        
-                        }
-                    })
-            },
-            getChargepoints: function(){
-                axios.get('/getChargepoints')
-                    .then(function (response) {
-                      this.chargePoints = response.data;
-                    //   console.log(response.data);
-                    }.bind(this));
 
-            },
-            getConnectors: function() {
-                axios.get('/getConnectors',{
-                      params: {
+        getChargepoints: function() {
+            axios.get("/getChargepoints").then(
+                function(response) {
+                    this.chargePoints = response.data;
+                    //   console.log(response.data);
+                }.bind(this)
+            );
+        },
+
+        getConnectors: function() {
+            axios
+                .get("/getConnectors", {
+                    params: {
                         cp_id: this.select_cp
-                      }
-                      }).then(function(response){
-                          this.connectors = response.data;
-                        }.bind(this));
-            },
-            bootnotification: function() {
-                axios.post('/getBootNotification',{
-                        connector: this.select_connector,
-                        cp_id: this.select_cp,
-                        chargePointSerialNumber: this.select_cp_serial,
-                        chargeBoxSerialNumber: this.select_cb_serial,
-                      }).then(function(response){
+                    }
+                })
+                .then(
+                    function(response) {
+                        this.connectors = response.data;
+                    }.bind(this)
+                );
+        },
+
+        bootnotification: function() {
+            axios
+                .post("/getBootNotification", {
+                    connector: this.select_connector,
+                    cp_id: this.select_cp,
+                    chargePointSerialNumber: this.select_cp_serial,
+                    chargeBoxSerialNumber: this.select_cb_serial
+                })
+                .then(
+                    function(response) {
+                        if (response.data == "success") {
+                            console.log("Booting Success...");
+                            this.authbtn = false;
+                        }
                         //   this.connectors = response.data;
-                        }.bind(this));
-            },
-            authenticate: function() {
-                axios.post('/authenticate',{
-                        id_tag: this.id_Tag,
-                        cp_id: this.select_cp,
-                      }).then(function(response){
-                        //   this.connectors = response.data;
-                        }.bind(this));
+                    }.bind(this)
+                );
+        },
+
+        authenticate: function() {
+            axios
+                .post("/authenticate", {
+                    id_tag: this.id_Tag,
+                    cp_id: this.select_cp,
+                    connector: this.select_connector
+                })
+                .then(
+                    function(response) {
+                        if (response.data == "success") {
+                            console.log("Authenticated...");
+                            this.authbtn = true;
+                            this.startbtn = false;
+                        } else {
+                            console.log(response.data);
+                        }
+                    }.bind(this)
+                );
+        },
+
+        startCharging: function() {
+            axios
+                .post("/startCharging", {
+                    id_tag: this.id_Tag,
+                    cp_id: this.select_cp,
+                    connector: this.select_connector
+                })
+                .then(
+                    function(response) {
+                        if (response.data == "success") {
+                            console.log("Transaction Started.....");
+                            this.startbtn = true;
+                            this.stopbtn = false;
+                            this.interval(response.data);
+                        }
+                    }.bind(this)
+                );
+        },
+
+        stopCharging: function() {
+            axios
+                .post("/stopCharging", {
+                    id_tag: this.id_Tag,
+                    cp_id: this.select_cp
+                })
+                .then(
+                    function(response) {
+                        //   console.log(response.data);
+                        if (response.data == "stop") {
+                            console.log("Transaction Stoped.....");
+                            this.interval(response.data);
+                            this.stopbtn = true;
+                            this.btnDisable = false;
+                        }
+                    }.bind(this)
+                );
+        },
+
+        interval: function(msg) {
+            if (msg == "success") {
+                console.log("Setting interval");
+                this.meterInterval = window.setInterval(() => {
+                    this.meterValues();
+                }, 3000);
+                this.beatInterval = window.setInterval(() => {
+                    this.heartBeat();
+                }, 3000);
+            } else {
+                console.log("Clearing Interval");
+                clearInterval(this.meterInterval);
+                clearInterval(this.beatInterval);
             }
         },
-        created: function(){
-          this.getChargepoints();
+
+        meterValues: function() {
+            console.log("meterValues");
+        },
+
+        heartBeat: function() {
+            console.log("heartBeat");
         }
+    },
+    created: function() {
+        this.getChargepoints();
     }
+};
 </script>
 @endsection

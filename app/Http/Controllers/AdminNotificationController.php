@@ -74,4 +74,35 @@ class AdminNotificationController extends Controller
             echo 'Auth error';
         }
     }
+
+    public function TransactionResponse(Request $request)
+    {
+        $mytime = Carbon::now();
+        $metadata = [
+            'MessageTypeId' => '3',
+            'UniqueId' => '746832',
+            'payload' => [
+                'expiryDate' => $mytime->toDateTimeString(),
+                'parentIdTag' => '15478',
+                'status' => 'Accepted',
+            ],
+            'transactionId' => '2468'
+        ];
+            $data = json_encode($metadata);
+            event(new BootNotificationResponse($data));
+    }
+
+    public function MeterValues(Request $request)
+    {
+
+    }
+
+    public function HeartBeatResponce(Request $request)
+    {
+
+    }
+    
+    public function StopTransaction(Request $request){
+
+    }
 }
