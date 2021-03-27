@@ -23,7 +23,8 @@ export default {
     data: function() {
         return {
             comment: "Admin",
-            data: ""
+            data: "",
+            realdata: []
         };
     },
     mounted() {
@@ -34,6 +35,8 @@ export default {
         listen() {
             Echo.channel("bootnotification").listen("BootNotification", e => {
                 this.data = e.data;
+                this.realdata = Object.values(e.data);
+                console.log(this.data);
                 this.checking();
             });
         },

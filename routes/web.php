@@ -36,6 +36,9 @@ Route::get('/getConnectors', [ClientController::class, 'getConnectors']);
 Route::get('/client', function () {
     return view('client.client');
 });
+Route::get('/newclient', function () {
+    return view('client.newclient');
+});
 Route::post('/getBootNotification', [ClientController::class, 'bootNotification']);
 Route::post('/authenticate', [ClientController::class, 'authenticate']);
 Route::post('/startCharging', [ClientController::class, 'startCharging']);

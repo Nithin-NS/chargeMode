@@ -1869,7 +1869,8 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       comment: "Admin",
-      data: ""
+      data: "",
+      realdata: []
     };
   },
   mounted: function mounted() {
@@ -1882,6 +1883,8 @@ __webpack_require__.r(__webpack_exports__);
 
       Echo.channel("bootnotification").listen("BootNotification", function (e) {
         _this.data = e.data;
+        _this.realdata = Object.values(e.data);
+        console.log(_this.data);
 
         _this.checking();
       });
