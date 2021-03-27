@@ -108,8 +108,8 @@ export default {
                     meterStart: this.data.payload.meterStart,
                     chargepoint: this.data.payload.chargepoint,
                     connectorId: this.data.payload.connectorId,
-                    currenTime: "10.25",
-                    interval: "2"
+                    reservationId: this.data.payload.reservationId,
+                    interval: "3000"
                 })
                 .then(
                     function(response) {

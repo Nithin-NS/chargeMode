@@ -17,6 +17,7 @@ class ClientController extends Controller
         $chargePoints = ChargePoint::get();
         return response()->json($chargePoints);
     }
+
     public function getConnectors(Request $request)
     { 
         $connectors = CPConnector::leftJoin('connectortype','cp_connector.connector_type', '=', 'connectortype.id')
@@ -26,6 +27,7 @@ class ClientController extends Controller
         
         return response()->json($connectors);
     }
+
     public function bootNotification(Request $request)
     {
         $cp_id = $request->get('cp_id');
@@ -54,6 +56,7 @@ class ClientController extends Controller
         broadcast(new BootNotification($data,$cp_id));
         return 'success';
     }
+    
     public function authenticate(Request $request)
     {
         $cp_id = $request->get('cp_id');
@@ -98,7 +101,7 @@ class ClientController extends Controller
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,
                     'meterStart' => '1230',
-                    'reservationId' => '12',
+                    'reservationId' => '1985',
                     'timestamp' => '12.12',
                 ]
         ];
