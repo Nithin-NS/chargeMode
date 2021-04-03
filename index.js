@@ -209,6 +209,11 @@ wss.on("connection", ws => {
         var meterStart = data.payload.meterStart;
         var reservationId = data.payload.reservationId;
 
+        var date = new Date();
+        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        var datetime = fullDate+' '+time;
+ 
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
@@ -232,12 +237,19 @@ wss.on("connection", ws => {
                         parentIdTag:"170443",
                         status:"Invalid"
                     },
-                    transactionId:"2468" 
+                    transactionId:"2468"
                 };
                 ws.send(JSON.stringify(metadata));
             }
             else{
                 console.log('Accepted')
+                
+                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start,Trans_Meter_Stop) VALUES ('"+connectorid+"','"+chargepoint+"','3459','170443','235265','"+datetime+"','45','53')";
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                    console.log("transactiondata inserted");
+                });
+
                 var metadata = {
                     MessageTypeId:"3",
                     UniqueId:"678534",
@@ -274,64 +286,22 @@ wss.on("connection", ws => {
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
 
-        if(connectorId == "1"){
-            con.connect(function(err) {
-                //Insert a record in the "transcations" table:
-                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start,Trans_Meter_Stop) VALUES ('"+connectorId+"','"+chargepoint+"','3459','170443','235265','"+datetime+"','45','53')";
-                con.query(sql, function (err, result) {
-                    if (err) throw err;
-                    console.log("transactiondata inserted");
-                });
-            });
+        //Insert a record in the "metervalue" table:
+        var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+datetime+"','235265','53')";
+        con.query(sql, function (err, result) {
+            if (err) throw err;
+            console.log("metervalue record inserted");
+        });
 
-            con.connect(function(err) {
-                //Insert a record in the "metervalue" table:
-                var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+datetime+"','235265','53')";
-                con.query(sql, function (err, result) {
-                    if (err) throw err;
-                    console.log("metervalue record inserted");
-                });
-            });
-
-            var metadata = {
-                MessagetypeId:"3",
-                UniqueId:"342337",
-                title:"MeterValuesResponse",
-                payload:{
-                    status: 'success'
-                }
-            };
-            ws.send(JSON.stringify(metadata));
-        }
-        else{
-            con.connect(function(err) {
-                //Insert a record in the "transcations" table:
-                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start,Trans_Meter_Stop) VALUES ('"+connectorId+"','"+chargepoint+"','3459','170443','235265','"+datetime+"','45','53')";
-                con.query(sql, function (err, result) {
-                    if (err) throw err;
-                    console.log("transactiondata inserted");
-                });
-            });
-
-            con.connect(function(err) {
-                //Insert a record in the "metervalue" table:
-                var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+datetime+"','235265','53')";
-                con.query(sql, function (err, result) {
-                    if (err) throw err;
-                    console.log("metervalue record inserted");
-                });
-            });
-            var metadata = {
-                MessagetypeId:"3",
-                UniqueId:"342337",
-                title:"MeterValuesResponse",
-                payload:{
-                    status: 'success'
-                }
-            };
-            ws.send(JSON.stringify(metadata));
-        }
-
+        var metadata = {
+            MessagetypeId:"3",
+            UniqueId:"342337",
+            title:"MeterValuesResponse",
+            payload:{
+                status: 'success'
+            }
+        };
+        ws.send(JSON.stringify(metadata));
     }//End of metervalues
 
     //hearBeat
@@ -361,6 +331,7 @@ wss.on("connection", ws => {
             transactionId:"2468"
         };
         ws.send(JSON.stringify(metadata));
+        // ws.terminate();
     }//End of Stop Transaction
 
     ws.on("close", () => {
