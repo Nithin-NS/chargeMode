@@ -15,16 +15,16 @@ class BootNotification implements ShouldBroadcast
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $data;
-    public $cp_id;
+    // public $chargepoint;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct($data, $cp_id)
+    public function __construct($data)
     {
         $this->data = json_decode($data);
-        $this->cp_id = $cp_id;
+        // $this->chargepoint = $chargepoint;
         // dd($this->cp_id);
     }
 
@@ -43,7 +43,7 @@ class BootNotification implements ShouldBroadcast
             // 'cb_serial' => $this->data['cb_serial'],
             // 'cp_serial' => $this->data['cp_serial'],
             'data' => $this->data,
-            'cp_id' => $this->cp_id,
+            // 'chargepoint' => $this->chargepoint,
         ];
     }
     public function broadcastOn()

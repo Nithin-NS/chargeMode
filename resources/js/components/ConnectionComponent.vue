@@ -269,6 +269,7 @@
 
 @section('scripts')
 <script>
+// import func from "vue-editor-bridge";
 //import func from 'vue-editor-bridge';
 export default {
     data: function() {
@@ -288,29 +289,63 @@ export default {
             id_Tag: "",
             msg: "",
             beatInterval: "",
-            meterInterval: ""
+            meterInterval: "",
+            ws: null,
+            url: "ws://localhost:8082/",
+            e: "",
+            val: ""
         };
     },
+    created: function() {
+        this.getChargepoints();
+        this.ws = new WebSocket(this.url + this.select_cp);
+
+        this.ws.addEventListener("open", () => {
+            console.log("We are connected!..");
+
+            // this.ws.send("Hey, How are you?");
+            this.ws.addEventListener("message", e => {
+                var msg = JSON.parse(e.data);
+
+                console.log(msg);
+
+                switch (msg.title) {
+                    case "BootNotificationResponse":
+                        this.BootNotificationResponse(msg);
+                        break;
+
+                    case "AuthenticateResponse":
+                        this.AuthenticateResponse(msg);
+                        break;
+
+                    case "StartTransactionResponse":
+                        this.StartTransactionResponse(msg);
+                        break;
+
+                    case "MeterValuesResponse":
+                        this.meterValuesResponce(msg);
+                        break;
+
+                    case "HeartBeatResponse":
+                        this.heartBeatResponce(msg);
+                        break;
+
+                    case "StopTransactionResponse":
+                        console.log("StopTransaction");
+                        this.StopTransactionResponse(msg);
+                        break;
+
+                    default:
+                        var text = "No value found";
+                        break;
+                }
+            });
+        });
+    },
     mounted() {
-        this.listen();
+        // this.listen();
     },
     methods: {
-        listen() {
-            Echo.channel("bootnotificationresponce").listen(
-                "BootNotificationResponse",
-                e => {
-                    this.data = JSON.parse(e.data);
-                    // console.log(this.data);
-                    // console.log(this.data);
-                    if (this.data.payload.status == "Accepted") {
-                        this.btnDisable = true;
-                        //    this.authbtn = false;
-                    } else {
-                    }
-                }
-            );
-        },
-
         getChargepoints: function() {
             axios.get("/getChargepoints").then(
                 function(response) {
@@ -334,7 +369,7 @@ export default {
                 );
         },
 
-        bootnotification: function() {
+        bootnotification() {
             axios
                 .post("/getBootNotification", {
                     connector: this.select_connector,
@@ -344,13 +379,17 @@ export default {
                 })
                 .then(
                     function(response) {
-                        if (response.data == "success") {
-                            console.log("Booting Success...");
-                            this.authbtn = false;
+                        if (response.data) {
+                            console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
+                        } else {
+                            console.log("No Data");
                         }
-                        //   this.connectors = response.data;
                     }.bind(this)
-                );
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
         },
 
         authenticate: function() {
@@ -362,15 +401,17 @@ export default {
                 })
                 .then(
                     function(response) {
-                        if (response.data == "success") {
-                            console.log("Authenticated...");
-                            this.authbtn = true;
-                            this.startbtn = false;
-                        } else {
+                        if (response.data) {
                             console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
+                        } else {
+                            // console.log("Auth Filed, Check your credentials");
                         }
                     }.bind(this)
-                );
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
         },
 
         startCharging: function() {
@@ -382,14 +423,56 @@ export default {
                 })
                 .then(
                     function(response) {
-                        if (response.data == "success") {
-                            console.log("Transaction Started.....");
-                            this.startbtn = true;
-                            this.stopbtn = false;
-                            this.interval(response.data);
+                        if (response.data) {
+                            console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
                         }
                     }.bind(this)
-                );
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
+        },
+
+        meterValues: function() {
+            // console.log("meterValues");
+            axios
+                .post("/meterValues", {
+                    id_tag: this.id_Tag,
+                    cp_id: this.select_cp,
+                    connector: this.select_connector
+                })
+                .then(
+                    function(response) {
+                        if (response.data) {
+                            console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
+                        }
+                    }.bind(this)
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
+        },
+
+        heartBeat: function() {
+            axios
+                .post("/heartBeat", {
+                    id_tag: this.id_Tag,
+                    cp_id: this.select_cp,
+                    connector: this.select_connector
+                })
+                .then(
+                    function(response) {
+                        if (response.data) {
+                            console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
+                        }
+                    }.bind(this)
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
         },
 
         stopCharging: function() {
@@ -400,19 +483,63 @@ export default {
                 })
                 .then(
                     function(response) {
-                        //   console.log(response.data);
-                        if (response.data == "stop") {
-                            console.log("Transaction Stoped.....");
-                            this.interval(response.data);
-                            this.stopbtn = true;
-                            this.btnDisable = false;
+                        if (response.data) {
+                            console.log(response.data);
+                            this.ws.send(JSON.stringify(response.data));
                         }
                     }.bind(this)
-                );
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
         },
 
-        interval: function(msg) {
-            if (msg == "success") {
+        // Bootnotification Responce;
+        BootNotificationResponse: function(msg) {
+            if (msg.payload.status == "Accepted") {
+                document.getElementById("auth").disabled = false;
+                document.getElementById("boot").disabled = true;
+                console.log("Boot Success");
+            } else {
+                console.log("Boot Faild");
+            }
+        },
+
+        // AuthenticateResponse;
+        AuthenticateResponse: function(msg) {
+            if (msg.payload.status == "Accepted") {
+                document.getElementById("auth").disabled = true;
+                document.getElementById("start").disabled = false;
+                console.log("Authentication Success");
+            } else {
+                console.log("Authentication Faild");
+            }
+        },
+
+        //Start Transaction Responce
+        StartTransactionResponse: function(msg) {
+            if (msg.IdTagInfo.status == "Accepted") {
+                this.val = "start";
+                document.getElementById("stop").disabled = false;
+                document.getElementById("start").disabled = true;
+                console.log("Transaction Success");
+                this.interval(this.val);
+            } else {
+                console.log("Transaction Faild");
+            }
+        },
+
+        //stop Transaction Responce
+        StopTransactionResponse: function(msg) {
+            document.getElementById("stop").disabled = true;
+            document.getElementById("boot").disabled = false;
+            this.val = "stop";
+            this.interval(this.val);
+        },
+
+        //method to start and stop interval to meterValues and heartBeat
+        interval: function(val) {
+            if (this.val == "start") {
                 console.log("Setting interval");
                 this.meterInterval = window.setInterval(() => {
                     this.meterValues();
@@ -427,16 +554,15 @@ export default {
             }
         },
 
-        meterValues: function() {
-            console.log("meterValues");
+        //Meretvalue responce
+        meterValuesResponce: function(msg) {
+            console.log("meterValues responce");
         },
 
-        heartBeat: function() {
-            console.log("heartBeat");
+        //heartbeat responce
+        heartBeatResponce: function() {
+            console.log("heartBeat responce");
         }
-    },
-    created: function() {
-        this.getChargepoints();
     }
 };
 </script>

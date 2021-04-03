@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 use App\Models;
 use App\Models\ChargePoint;
@@ -31,16 +30,16 @@ class ClientController extends Controller
     public function bootNotification(Request $request)
     {
         $cp_id = $request->get('cp_id');
-
-        $chargePointModel = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
-        // dd($chargePointModel);
+        $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
+        $connector = $request->get('connector');
         $metadata = [
             'MessageTypeId' => '2',
             'UniqueId' => '746832',
-            'title' => 'BootNotificationRequest',
+            'title' => 'BootNotification',
             'payload' => [
-                'chargePointVendor' => 'Point1',
-                'chargePointModel' => $chargePointModel,
+                'chargePointVendor' => $cp_id,
+                'chargePointModel' => $chargepoint,
+                'connector' => $connector,
                 'chargePointSerialNumber' => $request->get('chargePointSerialNumber'),
                 'chargeBoxSerialNumber' => $request->get('chargeBoxSerialNumber'),
                 'firmwareVersion' => 'V1',
@@ -53,8 +52,8 @@ class ClientController extends Controller
         // dd($chargePointModel);
         $data = json_encode($metadata);
         // dd($data);
-        broadcast(new BootNotification($data,$cp_id));
-        return 'success';
+        // event(new BootNotification($data));
+        return $data;
     }
     
     public function authenticate(Request $request)
@@ -64,25 +63,19 @@ class ClientController extends Controller
         $tag = $request->get('id_tag');
         $con_id = $request->get('connector');
         // $connector = ConnectorType::where('id', $con_id)->first()->Type;
-        if (User::where('user_id', '=', $tag)->exists()){
-            $metadata = [
-                'MessageTypeId' => '2',
-                'UniqueId' => '746832',
-                'title' => 'Authorize',
-                    'payload' => [
-                        'idTag' => $tag,
-                        'chargepoint' => $chargepoint,
-                        'connector' => $con_id
-                    ]
-            ];
+        $metadata = [
+            'MessageTypeId' => '2',
+            'UniqueId' => '746832',
+            'title' => 'Authorize',
+                'payload' => [
+                    'idTag' => $tag,
+                    'chargepoint' => $chargepoint,
+                    'connector' => $con_id
+                ]
+        ];
         $data = json_encode($metadata);
-        broadcast(new BootNotification($data,$cp_id));
-        return 'success';
-        }
-        else {
-            return 'Please Enter Valid Credentials';
-        }
-        
+        // broadcast(new BootNotification($data,$cp_id));
+        return $data;
     }
 
     public function startCharging(Request $request)
@@ -97,7 +90,7 @@ class ClientController extends Controller
             'UniqueId' => '746832',
             'title' => 'StartTransactionRequest',
                 'payload' => [
-                    'chargepoint' => $chargepoint,
+                    'chargepoint' => $cp_id,
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,
                     'meterStart' => '1230',
@@ -105,14 +98,110 @@ class ClientController extends Controller
                     'timestamp' => '12.12',
                 ]
         ];
-        $data = json_encode($metadata);
-        broadcast(new BootNotification($data,$cp_id));
 
-        return 'success';
+        $data = json_encode($metadata);
+        return $data;
+    }
+
+    public function meterValues(Request $request)
+    {
+        $cp_id = $request->get('cp_id');
+        $con_id = $request->get('connector');
+        $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
+        $id_tag = $request->get('id_tag');
+
+        $metadata = [
+            'MessageTypeId' => '2',
+            'UniqueId' => '746832',
+            'title' => 'MeterValuesRequest',
+            'payload' => [
+                'chargepoint' => $cp_id,
+                'connectorId' => $con_id,
+                'transactionId' => "94",
+                'meterValue' => [
+                'timeStamp' => "02-10-2020",
+                'stampledValue' => [
+                    'context' => "other",
+                    'format' => "signedData",
+                    'measurand' => "Power offered",
+                    'phase' => "LI",
+                    'location' => "EV",
+                    'unit' => "Kwh"
+                    ]
+                ]
+            ]
+        ];
+
+        $data = json_encode($metadata);
+        return $data;
+    }
+
+    public function heartBeat(Request $request){
+        $cp_id = $request->get('cp_id');
+        $con_id = $request->get('connector');
+        $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
+        $id_tag = $request->get('id_tag');
+
+        $metadata = [
+            'MessageTypeId' => '2',
+            'UniqueId' => '746832',
+            'title' => 'HeartBeatRequest',
+            'payload' => [
+                'chargepoint' => $chargepoint,
+                'connectorId' => $con_id,
+                'transactionId' => "94",
+                'meterValue' => [
+                'timeStamp' => "02-10-2020",
+                'stampledValue' => [
+                    'context' => "other",
+                    'format' => "signedData",
+                    'measurand' => "Power offered",
+                    'phase' => "LI",
+                    'location' => "EV",
+                    'unit' => "Kwh"
+                    ]
+                ]
+            ]
+        ];
+
+        $data = json_encode($metadata);
+        return $data;
     }
 
     public function stopCharging(request $request)
     {
-        return 'stop';
+        $cp_id = $request->get('cp_id');
+        $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
+        $con_id = $request->get('connector');
+        $id_tag = $request->get('id_tag');
+
+        $metadata = [
+            'MessageTypeId' => '2',
+            'UniqueId' => '746832',
+            'title' => 'StopTransactionRequest',
+                'payload' => [
+                    'chargepoint' => $chargepoint,
+                    'connectorId' => $con_id,
+                    'idTag' => $id_tag,
+                    'meterStop' => '1230',
+                    'transactionId' => '1985',
+                    'reason' => 'Emergency Stop',
+                    'transactionData' => [
+                        'timeStamp' => "02-10-2020",
+                        'stampledValue' => [
+                            'context' => "other",
+                            'format' => "signedData",
+'                            measurand' => "Power offered",
+                            'phase' => "LI",
+                            'location' => "EV",
+                            'unit' > "Kwh"
+                    ]
+                ]
+            ]   
+        ];
+
+        $data = json_encode($metadata);
+        // broadcast(new BootNotification($data,$chargepoint));
+        return $data;
     }
 }

@@ -42,6 +42,8 @@ Route::get('/newclient', function () {
 Route::post('/getBootNotification', [ClientController::class, 'bootNotification']);
 Route::post('/authenticate', [ClientController::class, 'authenticate']);
 Route::post('/startCharging', [ClientController::class, 'startCharging']);
+Route::post('/meterValues', [ClientController::class, 'meterValues']);
+Route::post('/heartBeat', [ClientController::class, 'heartBeat']);
 Route::post('/stopCharging', [ClientController::class, 'stopCharging']);
 
 //From Admin to Client

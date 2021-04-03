@@ -57,6 +57,8 @@
 @show
 {{-- <script src='https://cdnjs.com/libraries/Chart.js'></script> --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js" integrity="sha384-DkkWv9oJFWLIydBXXjkBWnG1/fuVhw8YPBq37uvvD6WSYRFRqr21eY5Dg9ZhmWdy" crossorigin="anonymous"></script>
+
 <!--[if lt IE 9]>
 <script src="{{ asset('/vendor/html5shiv/html5shiv.min.js', config('app.asset_secure')) }}"></script>
 
@@ -70,6 +72,7 @@
 
 <!-- Scripts -->
 <script src="{{ asset('/assets/vendor/breakpoints/breakpoints.js', config('app.asset_secure')) }}"></script>
+
 <script>
   Breakpoints();
 </script>

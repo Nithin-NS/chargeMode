@@ -18,33 +18,50 @@
     </div>
 </template>
 
+<script></script>
+
+//
 <script>
 export default {
     data: function() {
         return {
             comment: "Admin",
             data: "",
-            realdata: []
+            realdata: [],
+            CP_id: "CP01",
+            connecttion: null
         };
     },
     mounted() {
         console.log("Admin Component  mounted.");
-        this.listen();
+        // this.listen();
+        const ws = new WebSocket("ws://localhost:8082");
+
+        ws.addEventListener("open", () => {
+            console.log("Admin connected!..");
+        });
+
+        ws.addEventListener("message", ({ data }) => {
+            console.log(data);
+        });
     },
     methods: {
         listen() {
-            Echo.channel("bootnotification").listen("BootNotification", e => {
-                this.data = e.data;
-                this.realdata = Object.values(e.data);
-                console.log(this.data);
-                this.checking();
-            });
+            Echo.channel("bootnotification." + this.CP_id).listen(
+                "BootNotification",
+                e => {
+                    this.data = e.data;
+                    this.realdata = Object.values(e.data);
+                    console.log(this.data);
+                    this.checking();
+                }
+            );
         },
         checking() {
             var title = this.data.title;
 
             switch (title) {
-                case "BootNotificationRequest":
+                case "BootNotification":
                     console.log(
                         "BootNotification from " +
                             this.data.payload.chargePointModel
