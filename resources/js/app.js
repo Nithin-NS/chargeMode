@@ -22,6 +22,9 @@ window.Vue = require('vue').default;
 // Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('broadcast', require('./components/BroadcastComponent.vue').default);
 Vue.component('connection', require('./components/ConnectionComponent.vue').default);
+Vue.component('usercomponent', require('./components/UserComponent.vue').default);
+Vue.component('messages', require('./components/DeviceMessagesComponent.vue').default);
+Vue.component('remotestart', require('./components/RemoteStartComponent.vue').default);
 Vue.component('admin', require('./components/AdminComponent.vue').default);
 
 

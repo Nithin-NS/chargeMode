@@ -1,5 +1,49 @@
 const WebSocket = require('ws');
 
+const remotejs = require('./public/js/remote.js');
+
+var fs = require('fs');
+
+const path = require('path');
+
+const express = require('express');
+
+const app = express();
+
+const http = require('http');
+
+const port = 8000;
+
+app.use(express.urlencoded({ extended: true }));
+
+const server = http.createServer(app);
+
+// app.post('/remoteStart', (req, res)=>{
+//     calling.aFunction();
+//     res.send('A message!');
+// });
+
+// remotejs.remote();
+
+const dir = './public/device_messages';
+
+try {
+        if (!fs.existsSync(dir)){
+            fs.mkdir(path.join(__dirname, dir), (err) => {
+                if (err) {
+                    return console.error(err);
+                }
+                console.log('Directory created successfully!');
+            });
+        }
+        else{
+            console.log('Directory Exists!');
+        }
+    } 
+catch (err) {
+            console.error(err);
+    }
+
 const wss = new WebSocket.Server({ port: 8082 });
 
 wss.on("connection", ws => {
@@ -10,9 +54,11 @@ wss.on("connection", ws => {
         // var msg = data;
         var msg = JSON.parse(data);
 
-        // console.log(msg.)
+        var title = msg[2];
 
-        switch (msg.title) {
+        console.log(msg)
+
+        switch (title) {
 
             case "BootNotification":
                 console.log('boot');
@@ -54,19 +100,56 @@ wss.on("connection", ws => {
 
     //Function to Handle BootnotificationRequests from Charging Point
     function BootNotification(msg){
-        // console.log(msg);
+        console.log(msg);
         var data = msg;
-        var cbserialno = data.payload.chargeBoxSerialNumber;
-        var cpserialno = data.payload.chargePointSerialNumber;
-        var cp_id = data.payload.chargePointVendor;
-        var uniqid = data.UniqueId;
-        var connector = data.payload.connector;
+        var cbserialno = data[3].chargeBoxSerialNumber;
+        var cpserialno = data[3].chargePointSerialNumber;
+        var cp_name = data[3].chargePointModel;
+        var uniqid = data[1];
         var cpstatus = "0";
 
         var date = new Date();
         var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
+
+        //setting the path
+        const path = './public/device_messages/messages.json'
+
+        //Convert it from an object to a string with JSON.stringify
+        var json = JSON.stringify(msg);
+
+        //Check the file exist or not create it, and use fs to write the file to disk
+        try {
+            if (fs.existsSync(path)) {
+                //file exist
+                console.log("File exists.");
+                fs.readFile(path, 'utf8', function readFileCallback(err, data){
+                    if (err){
+                        console.log(err);
+                    } else {
+                    // obj = JSON.parse(data); //now it an object
+                    // obj.table.push(msg); //add some data
+                    json = JSON.stringify(msg); //convert it back to json
+                    // json = msg; //convert it back to json
+                    fs.appendFileSync(path, json, 'utf8', function(err){
+                        console.log(err);
+                    }); // write it back 
+                }});
+            } else {
+                //file not exist
+                console.log("File does not exist.");
+                fs.writeFile(path, json, 'utf8', function(err){
+                    if (err) {
+                        return console.log(err);
+                    }
+                    console.log('Json file generated succesfully.');
+                });
+            }
+          } catch(err) {
+            console.error(err)
+        }
+        //end of json file save section
 
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -76,69 +159,119 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-
-
-        var queryString = "SELECT * FROM chargepoint WHERE CP_ID = ? AND CB_Serial_No= ? AND CP_Serial_No= ?;"
-        var filter = [cp_id, cbserialno, cpserialno];
+        var queryString = "SELECT * FROM chargepoints WHERE CP_Name = ?;"
+        var filter = [cp_name];
 
         con.query(queryString, filter, function(err, results) {
-            // console.log(results.length);
-            var querystr = "SELECT * FROM cp_connector WHERE cp_id=? AND connector_type=? AND status=?;"
-            var filter1 = [cp_id, connector, cpstatus] ;
-            
-            con.query(querystr, filter1, function(err, results1){
-                // console.log(results1.length);
-                
-                //Wrong Credancials
-                if(results.length === 0 && results1.length === 0){
+                if(results.length === 0){
                     console.log('Rejected');
-                    var metadata = { 
-                        MessageTypeId:"3",
-                        UniqueId: uniqid,
-                        title:"BootNotificationResponse",
-                        payload:{
-                            status:"Rejected",
-                            currenTime:datetime,
-                            interval:"2"
+                    var metadata = [
+                        3,
+                        uniqid,
+                        {
+                            currenTime: datetime,
+                            interval: "15",
+                            status: 'Rejected',
                         }
-                    };
+                    ];
+                    console.log(metadata);
+
+                    //setting the path
+                    const path = './public/device_messages/messages.json'
+
+                    //Convert it from an object to a string with JSON.stringify
+                    var json = JSON.stringify(metadata);
+
+                    //Check the file exist or not create it, and use fs to write the file to disk
+                    try {
+                        if (fs.existsSync(path)) {
+                            //file exist
+                            console.log("File exists.");
+                            fs.readFile(path, 'utf8', function readFileCallback(err, data){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                // obj = JSON.parse(data); //now it an object
+                                // obj.table.push(msg); //add some data
+                                json = JSON.stringify(metadata); //convert it back to json
+                                // json = msg; //convert it back to json
+                                fs.appendFileSync(path, json, 'utf8', function(err){
+                                    console.log(err);
+                                }); // write it back 
+                            }});
+                        } else {
+                            //file not exist
+                            console.log("File does not exist.");
+                            fs.writeFile(path, json, 'utf8', function(err){
+                                if (err) {
+                                    return console.log(err);
+                                }
+                                console.log('Json file generated succesfully.');
+                            });
+                        }
+                      } catch(err) {
+                        console.error(err)
+                    }
+                    //end of json file save section
+
                     // Sending responce with status Rejected
                     ws.send(JSON.stringify(metadata));
                 }
 
                 //Valid Credentials
                 else {
-                console.log('Accepted');
-                var queryString = "UPDATE cp_connector SET status = '1' WHERE cp_id = ? AND connector_type = ? AND status = ?;"
-                var filter = [cp_id,connector,cpstatus];
-                con.query(queryString, filter, function(err, results) {
-                    console.log('Updated');
-                });
+                    console.log('Accepted');
+                    var metadata = [
+                        3,
+                        uniqid,
+                        {
+                            currenTime: datetime,
+                            interval: "15",
+                            status: 'Accepted'
+                        }
+                    ];
+                    console.log(metadata);
 
-                var metadata = { 
-                    MessageTypeId:"3",
-                    UniqueId: uniqid,
-                    title:"BootNotificationResponse",
-                    payload:{
-                        status:"Accepted",
-                        currenTime:datetime,
-                        interval:"2"
+                    //setting the path
+                    const path = './public/device_messages/messages.json'
+
+                    //Convert it from an object to a string with JSON.stringify
+                    var json = JSON.stringify(metadata);
+
+                    //Check the file exist or not create it, and use fs to write the file to disk
+                    try {
+                        if (fs.existsSync(path)) {
+                            //file exist
+                            console.log("File exists.");
+                            fs.readFile(path, 'utf8', function readFileCallback(err, data){
+                                if (err){
+                                    console.log(err);
+                                } else {
+                                // obj = JSON.parse(data); //now it an object
+                                // obj.table.push(msg); //add some data
+                                json = JSON.stringify(msg); //convert it back to json
+                                // json = msg; //convert it back to json
+                                fs.appendFileSync(path, json, 'utf8', function(err){
+                                    console.log(err);
+                                }); // write it back 
+                            }});
+                        } else {
+                            //file not exist
+                            console.log("File does not exist.");
+                            fs.writeFile(path, json, 'utf8', function(err){
+                                if (err) {
+                                    return console.log(err);
+                                }
+                                console.log('Json file generated succesfully.');
+                            });
+                        }
+                    } catch(err) {
+                        console.error(err)
                     }
-                };
-                // var metadata = [ 
-                //     "3",
-                //     uniqid,
-                //     "BootNotificationResponse",
-                //     {
-                //         status:"Accepted",
-                //         currenTime:datetime,
-                //         interval:"2"
-                //     }
-                // ];
-                //Sending responce with status accepted
-                ws.send(JSON.stringify(metadata));
+                    //end of json file save section
+
+                    ws.send(JSON.stringify(metadata));
                 }
-            });
         });
     }//End of BootNotification
 
@@ -146,9 +279,10 @@ wss.on("connection", ws => {
     function authentication(msg){
         console.log('Inside Auth');
         var data = msg;
-        var idTag = data.payload.idTag;
-        var chargepoint = data.payload.chargepoint;
-        var connector = data.payload.connector;
+        var idTag = data[3].idTag;
+        var chargepoint = data[3].chargepoint;
+        var connector = data[3].connector;
+        var uniqid = data[1];
         
         console.log(idTag + ' | ' + chargepoint + ' | ' + connector);
 
@@ -159,38 +293,39 @@ wss.on("connection", ws => {
             password: "",
             database: "chargemode_websockets"
         });
+
         var sql = 'SELECT * FROM users WHERE user_id = ' + mysql.escape(idTag);
         con.query(sql, function (err, result) {
             if (err) throw err;
 
             //Invalid User
             if(result.length === 0 ){
-                var metadata = {
-                    MessageTypeId:"3",
-                    Uniqueid:"456378",
-                    title:"AuthenticateResponse",
-                    payload:{
+                var metadata = [
+                    3,
+                    uniqid,
+                    // "AuthenticateResponse",
+                    {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
                         status:"Invalid"
                     }
-                };
+                ];
                 //Sending Responce with status Invalid
                 console.log(JSON.stringify(metadata));
                 ws.send(JSON.stringify(metadata));
             }
             //Valid User
             else{
-                var metadata = {
-                    MessageTypeId:"3",
-                    Uniqueid:"456378",
-                    title:"AuthenticateResponse",
-                    payload:{
+                var metadata = [
+                    3,
+                    uniqid,
+                    // title:"AuthenticateResponse",
+                    {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
                         status:"Accepted"
                     }
-                };
+                ];
                 //Sending Responce with Status Accepted
                 console.log(JSON.stringify(metadata));
                 ws.send(JSON.stringify(metadata));
@@ -203,16 +338,19 @@ wss.on("connection", ws => {
         console.log('Inside StartTransaction');
 
         var data = msg;
-        var chargepoint = data.payload.chargepoint;
-        var connectorid = data.payload.connectorId;
-        var idTag = data.payload.idTag;
-        var meterStart = data.payload.meterStart;
-        var reservationId = data.payload.reservationId;
+        var chargepoint = data[3].chargepoint;
+        var connectorid = data[3].connectorId;
+        var idTag = data[3].idTag;
+        var meterStart = data[3].meterStart;
+        var reservationId = data[3].reservationId;
+        var uniqid = data[1];
 
         var date = new Date();
         var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
+        var datetime1 = fullDate+' '+time;
+
+        // console.log(datetime);
  
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -221,46 +359,46 @@ wss.on("connection", ws => {
             password: "",
             database: "chargemode_websockets"
         });
-        var sql = 'SELECT * FROM connectortype WHERE id = ' + mysql.escape(connectorid);
+        var sql = 'SELECT * FROM connectors WHERE id = ' + mysql.escape(connectorid);
         con.query(sql, function (err, result) {
             if (err) throw err;
             
             //Invalid
             if(result.length === 0){
                 console.log('Invalid')
-                var metadata = {
-                    MessageTypeId:"3",
-                    UniqueId:"678534",
-                    title:"StartTransactionResponse",
-                    IdTagInfo:{
+                var metadata = [
+                    3,
+                    uniqid,
+                    // "StartTransactionResponse",
+                    {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
                         status:"Invalid"
                     },
-                    transactionId:"2468"
-                };
+                    transactionId="2468"
+                ];
                 ws.send(JSON.stringify(metadata));
             }
             else{
                 console.log('Accepted')
                 
-                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start,Trans_Meter_Stop) VALUES ('"+connectorid+"','"+chargepoint+"','3459','170443','235265','"+datetime+"','45','53')";
+                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start) VALUES ('"+connectorid+"','"+chargepoint+"','3459','170443','235265','"+datetime1+"','45')";
                 con.query(sql, function (err, result) {
                     if (err) throw err;
                     console.log("transactiondata inserted");
                 });
 
-                var metadata = {
-                    MessageTypeId:"3",
-                    UniqueId:"678534",
-                    title:"StartTransactionResponse",
-                    IdTagInfo:{
+                var metadata = [
+                    3,
+                    uniqid,
+                    // title:"StartTransactionResponse",
+                    {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
                         status:"Accepted"
                     },
-                    transactionId:"2468"
-                };
+                    transactionId="2468"
+                ];
                 ws.send(JSON.stringify(metadata));
             }
         });
@@ -270,8 +408,9 @@ wss.on("connection", ws => {
     //MeterValues
     function MeterValues(msg){
         var data = msg;
-        var chargepoint = data.payload.chargepoint;
-        var connectorId = data.payload.connectorId;
+        var chargepoint = data[3].chargepoint;
+        var connectorId = data[3].connectorId;
+        var uniqid = data[1];
 
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -295,7 +434,7 @@ wss.on("connection", ws => {
 
         var metadata = {
             MessagetypeId:"3",
-            UniqueId:"342337",
+            UniqueId: uniqid,
             title:"MeterValuesResponse",
             payload:{
                 status: 'success'
@@ -306,9 +445,12 @@ wss.on("connection", ws => {
 
     //hearBeat
     function HeartBeat(msg){
+        var data = msg;
+        var uniqid = data[1];
+
         var metadata =  {
             MessagetypeId:"3",
-            UniqueId:"334741",
+            UniqueId: uniqid,
             title:"HeartBeatResponse",
             payload:{
                 currentTime: '02-04-21' 
@@ -319,9 +461,38 @@ wss.on("connection", ws => {
     
     //Stop Transaction
     function StopTransaction(msg){
+
+        var data = msg;
+        var chargepoint = data[3].chargepoint;
+        var connectorId = data[3].connectorId;
+        var idTag = data[3].idTag;
+        //var meterStart = data.payload.meterStart;
+        // var reservationId = data.payload.reservationId;
+        var meterStop = data[3].meterStop;
+        var uniqid = data[1];
+
+        var date = new Date();
+        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        var datetime = fullDate+' '+time;
+ 
+        var mysql = require('mysql');
+        var con = mysql.createConnection({
+            host: "localhost",
+            user: "root",
+            password: "",
+            database: "chargemode_websockets"
+        });
+
+        var sql = 'UPDATE transactions SET Trans_Meter_Stop = ? WHERE Connector_ID = ? AND CP_ID = ?';
+        
+        con.query(sql,[meterStop, connectorId, chargepoint], function(err,rows,fields) { 
+            console.log('Transactions Updated');
+        });
+
         var metadata = {
             MessageTypeId:"3",
-            UniqueId:"678534",
+            UniqueId: uniqid,
             title:"StopTransactionResponse",
             IdTagInfo:{
                 expiryDate:"2021-3-8T3.00PM",

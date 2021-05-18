@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Home')
+@section('title', 'Dashboard')
 
 @section('header')
     <h1 class="page-title">Dashboard</h1>
@@ -76,7 +76,7 @@
                         </div>
                         <div class="counter-number-group mb-15">
                             <span class="counter-number-related">#</span>
-                            <span class="counter-number">{{count($charge_points)}}</span>
+                            <span class="counter-number">{{count($chargepoints)}}</span>
                         </div>
 
                     </div>

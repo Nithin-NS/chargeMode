@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class ConnectorTypesTable extends Migration
+class ChangeChargepointTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,7 @@ class ConnectorTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('connectortype', function (Blueprint $table) {
-            $table->id();
-            $table->string('Type');
-            $table->string('Remarks');
-            $table->timestamps();
-        });
+        Schema::rename('chargepoint', 'chargepoints');
     }
 
     /**
@@ -28,6 +23,6 @@ class ConnectorTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('connector_types');
+        Schema::rename('chargepoints', 'chargepoint');
     }
 }

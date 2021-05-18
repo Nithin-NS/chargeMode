@@ -4,7 +4,7 @@
       <div>
             <ul class="site-menu" data-plugin="menu">
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ route('admin.dashboard') }}">
+              	<a class="animsition-link" href="{{ route('dashboard') }}">
                     <i class="fa fa-tachometer" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Dashboard
@@ -13,7 +13,7 @@
                 </a>
               </li>
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ url('/connector') }}">
+              	<a class="animsition-link" href="{{ route('connector') }}">
                     <i class="fa fa-plug" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Connector Type
@@ -31,7 +31,7 @@
                 </a>
               </li> -->
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ url('/CP') }}">
+              	<a class="animsition-link" href="{{ route('chargepoints') }}">
                     <i class="fa fa-microchip" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Charge Point
@@ -40,7 +40,7 @@
                 </a>
               </li>
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ url('/transaction') }}">
+              	<a class="animsition-link" href="{{ route('transactions') }}">
                     <i class="fa fa-list" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Charging Activity
@@ -49,7 +49,7 @@
                 </a>
               </li>
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ url('/customer') }}">
+              	<a class="animsition-link" href="{{ route('customers') }}">
                     <i class="fa fa-users" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Users
@@ -58,8 +58,17 @@
                 </a>
               </li>
               <li class="site-menu-item" data-prefix="">
-              	<a class="animsition-link" href="{{ url('/messages') }}">
-                    <i class="fa fa-users" aria-hidden="true"></i>
+              	<a class="animsition-link" href="#">
+                  <i class="fa fa-user"></i>
+                     <span class="site-menu-title" style="margin-left: 10px;">
+                     	Admins
+                     </span>              
+                    <span class="site-menu-arrow"></span>
+                </a>
+              </li>
+              <li class="site-menu-item" data-prefix="">
+              	<a class="animsition-link" href="{{ route('messages') }}">
+                    <i class="fa fa-envelope" aria-hidden="true"></i>
                      <span class="site-menu-title" style="margin-left: 10px;">
                      	Device Messages
                      </span>              

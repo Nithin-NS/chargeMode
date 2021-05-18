@@ -12,11 +12,15 @@
 <link rel="apple-touch-icon" href="{{ asset('/assets/images/apple-touch-icon.png', config('app.asset_secure')) }}">
 <link rel="shortcut icon" href="{{ asset('/assets/images/favicon.ico', config('app.asset_secure')) }}">
 
+
+
 <!-- Stylesheets -->
 <link rel="stylesheet" href="{{ asset('/assets/css/bootstrap.min.css', config('app.asset_secure')) }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/bootstrap-extend.min.css', config('app.asset_secure')) }}">
 <link rel="stylesheet" href="{{ asset('/assets/css/site.min.css', config('app.asset_secure')) }}">
 <link rel="stylesheet" href="{{ asset('/assets/skins/orange.min.css ', config('app.asset_secure')) }}">
+<link rel="stylesheet" href="{{ asset('/css/jquery.datetimepicker.css') }}">
+<link rel="stylesheet" href="{{ asset('/css/msc-style.css') }}">
 
 
 <!-- Plugins -->
@@ -54,10 +58,12 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css"> --}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.css" integrity="sha512-/zs32ZEJh+/EO2N1b0PEdoA10JkdC3zJ8L5FTiQu82LR9S/rOQNfQN7U59U9BC12swNeRAz3HSzIL2vpp4fv3w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="{{ asset('/assets/fonts/web-icons/web-icons.min.css', config('app.asset_secure')) }}">
+
+
 @show
 {{-- <script src='https://cdnjs.com/libraries/Chart.js'></script> --}}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
-<script src="https://cdn.socket.io/4.0.0/socket.io.min.js" integrity="sha384-DkkWv9oJFWLIydBXXjkBWnG1/fuVhw8YPBq37uvvD6WSYRFRqr21eY5Dg9ZhmWdy" crossorigin="anonymous"></script>
 
 <!--[if lt IE 9]>
 <script src="{{ asset('/vendor/html5shiv/html5shiv.min.js', config('app.asset_secure')) }}"></script>
@@ -72,6 +78,8 @@
 
 <!-- Scripts -->
 <script src="{{ asset('/assets/vendor/breakpoints/breakpoints.js', config('app.asset_secure')) }}"></script>
+
+<script type="text/javascript" src="{{ asset('/js/remote.js', config('app.asset_secure')) }}"></script>
 
 <script>
   Breakpoints();

@@ -6,10 +6,11 @@ use App\Http\Controllers\BroadcastController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\AdminLoginController;
 use App\Http\Controllers\AdminNotificationController;
+use App\Http\Controllers\StationMessageController;
 use App\Http\Controllers\AdminController;
+// use app\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
-require app_path() . '/Loader/Load.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -65,20 +66,68 @@ Route::group(['middleware'=>['auth']], function()
 //user routes
 Route::get('/users/logout', 'App\Http\Controllers\Auth\LoginController@userLogout')->name('user.logout');
 
+
+
+Route::get('/admin/index', function () {
+    return view('admin.index');
+})->name('admin.index');
+
 //admin login
 Route::get('/admin/login', 'App\Http\Controllers\Auth\AdminLoginController@showLoginForm')->name('admin.login');
 Route::post('/admin/login', 'App\Http\Controllers\Auth\AdminLoginController@login')->name('admin.login.submit');
 Route::get('/admin/logout', 'App\Http\Controllers\Auth\AdminLoginController@logout')->name('admin.logout');
 
 //Admin Routes with authentication
-Route::group(['middleware'=>['auth:admin']], function() 
+Route::group(['middleware'=>['auth:admin']], function()
 {
-    Route::get('/admin/index', function () {
-        return view('admin.index');
-    })->name('admin.index');
-    Route::get('/admin/dashboard', 'App\Http\Controllers\AdminController@index')->name('admin.dashboard');
-});
-//Autoload
-Route::get('/loader', function () {
-    echo (new Loader\Load)->index();
+    //Dashboard Routes
+    Route::get('/admin/dashboard', 'App\Http\Controllers\DashboardController@index')->name('dashboard');
+    
+    //Connector Routes
+    Route::get('/admin/connector', 'App\Http\Controllers\ConnectorController@index')->name('connector');
+    Route::get('/admin/createconnector', 'App\Http\Controllers\ConnectorController@create')->name('createconnector');
+    Route::post('/admin/saveconnector', 'App\Http\Controllers\ConnectorController@store')->name('saveconnector');
+    Route::get('/admin/connector/edit/{id}', 'App\Http\Controllers\ConnectorController@show')->name('showconnector');
+	Route::post('/connector/update/{id}','App\Http\Controllers\ConnectorController@update')->name('updateconnector');
+	Route::get('/connector/delete/{id}','App\Http\Controllers\ConnectorController@destroy')->name('deleteconnector');
+	Route::get('/searchconnector','App\Http\Controllers\ConnectorController@search_connector')->name('searchconnector');
+
+    //Charge Point Routes
+    Route::get('/admin/chargepoint', 'App\Http\Controllers\ChargePointController@index')->name('chargepoints');
+    Route::get('/admin/addchargepoint', 'App\Http\Controllers\ChargePointController@create')->name('addchargepoint');
+    Route::post('/admin/savechargepoint', 'App\Http\Controllers\ChargePointController@store')->name('savechargepoint');
+	Route::get('/chargepoint/details/{id}','App\Http\Controllers\ChargePointController@details')->name('chargepointdetails');
+	Route::get('/chargepoint/edit/{id}','App\Http\Controllers\ChargePointController@show')->name('chargepointshow');
+	Route::post('/chargepoint/update/{id}','App\Http\Controllers\ChargePointController@update')->name('chargepointupdate');
+	Route::get('/chargepoint/delete/{id}','App\Http\Controllers\ChargePointController@destroy')->name('chargepointdelete');
+	Route::get('/searchchargepoint','App\Http\Controllers\ChargePointController@searchchargepoint')->name('chargepointsearch');
+
+    //transaction Routes
+    Route::get('/admin/transaction', 'App\Http\Controllers\TransactionController@index')->name('transactions');
+	Route::get('/transactions/edit/{id}','App\Http\Controllers\TransactionController@show')->name('edittransaction');
+	Route::post('/transactions/update/{id}','App\Http\Controllers\TransactionController@update')->name('updatetransaction');
+	Route::get('/transactions/delete/{id}','App\Http\Controllers\TransactionController@destroy')->name('deletetransaction');
+
+    //customer Routes
+    Route::get('/admin/customer', 'App\Http\Controllers\CustomerController@index')->name('customers');
+
+    Route::get('/getUserDetails', 'App\Http\Controllers\CustomerController@getUserDetails')->name('getUserDetails');
+    Route::get('/findChargePoints', 'App\Http\Controllers\CustomerController@findChargePoints')->name('findChargePoints');
+
+    Route::get('/admin/addcustomer', 'App\Http\Controllers\CustomerController@create')->name('addcustomer');
+    Route::post('/admin/savecustomer', 'App\Http\Controllers\CustomerController@store')->name('savecustomer');
+	Route::get('/customer/edit/{id}','App\Http\Controllers\CustomerController@show')->name('editcustomer');
+	Route::post('/customer/update/{id}','App\Http\Controllers\CustomerController@update')->name('updatecustomer');
+	Route::get('/customer/delete/{id}','App\Http\Controllers\CustomerController@destroy')->name('deletecustomer');
+	Route::get('/searchuser','App\Http\Controllers\CustomerController@searchcustomer')->name('searchcustomer');
+
+    //Message Routes
+    Route::get('/admin/messages', 'App\Http\Controllers\StationMessageController@index')->name('messages');  
+    Route::get('/getDeviceMessages', 'App\Http\Controllers\StationMessageController@getDeviceMessages')->name('getDeviceMessages');  
+
+    //Remote Operations Routes
+	Route::get('/findConnectors','App\Http\Controllers\RemoteOperationController@findConnectors')->name('findConnectors');
+	Route::post('/remoteStart/{id}','App\Http\Controllers\RemoteOperationController@remotestart')->name('remotestart');
+	Route::post('/remoteStop/{id}','App\Http\Controllers\RemoteOperationController@remotestop')->name('remotestop');
+
 });

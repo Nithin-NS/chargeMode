@@ -1,13 +1,12 @@
 <?php
 namespace App\Http\Controllers;
-use App\Models;
+
 use App\Models\ChargePoint;
-use App\Models\CPConnector;
-use App\Models\ConnectorType;
+use App\Models\ChargepiontConnector;
+use App\Models\Connector;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
-use App\Events\BootNotification;
 
 class ClientController extends Controller
 {
@@ -19,9 +18,9 @@ class ClientController extends Controller
 
     public function getConnectors(Request $request)
     { 
-        $connectors = CPConnector::leftJoin('connectortype','cp_connector.connector_type', '=', 'connectortype.id')
-                            ->select('connectortype.id','connectortype.Type')
-                            ->where('cp_id', $request->cp_id)
+        $connectors = ChargepiontConnector::leftJoin('connectors','chargepoint_connector.connector_id', '=', 'connectors.id')
+                            ->select('connectors.id','connectors.Type')
+                            ->where('chargepoint_id', $request->cp_id)
                             ->get();
         
         return response()->json($connectors);
@@ -29,24 +28,30 @@ class ClientController extends Controller
 
     public function bootNotification(Request $request)
     {
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result
+        $UniqueId = str_shuffle($pin);
+
         $cp_id = $request->get('cp_id');
         $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
         $connector = $request->get('connector');
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => '746832',
-            'title' => 'BootNotification',
-            'payload' => [
-                'chargePointVendor' => $cp_id,
+            2,
+            $UniqueId,
+            'BootNotification',
+            [
+                'chargePointVendor' => 'chargeMOD',
                 'chargePointModel' => $chargepoint,
-                'connector' => $connector,
-                'chargePointSerialNumber' => $request->get('chargePointSerialNumber'),
                 'chargeBoxSerialNumber' => $request->get('chargeBoxSerialNumber'),
+                'chargePointSerialNumber' => $request->get('chargePointSerialNumber'),
                 'firmwareVersion' => 'V1',
-                'iccid' => '1111',
-                'imsi' => '2222',
-                'meterType' => 'metertype1',
-                'meterSerialNumber' => 'MTR1234'
+                'meterType' => 'INTERNAL',
             ]
         ];
         // dd($chargePointModel);
@@ -63,9 +68,20 @@ class ClientController extends Controller
         $tag = $request->get('id_tag');
         $con_id = $request->get('connector');
         // $connector = ConnectorType::where('id', $con_id)->first()->Type;
+        
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result
+        $UniqueId = str_shuffle($pin);
+
         $metadata = [
             'MessageTypeId' => '2',
-            'UniqueId' => '746832',
+            'UniqueId' => $UniqueId,
             'title' => 'Authorize',
                 'payload' => [
                     'idTag' => $tag,
@@ -85,16 +101,28 @@ class ClientController extends Controller
         $con_id = $request->get('connector');
         $id_tag = $request->get('id_tag');
 
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result - UniqueId
+        $UniqueId = str_shuffle($pin);
+        // shuffle the result - reservationId
+        $reservationId = str_shuffle($pin);
+
         $metadata = [
             'MessageTypeId' => '2',
-            'UniqueId' => '746832',
+            'UniqueId' => $UniqueId,
             'title' => 'StartTransactionRequest',
                 'payload' => [
                     'chargepoint' => $cp_id,
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,
                     'meterStart' => '1230',
-                    'reservationId' => '1985',
+                    'reservationId' => $reservationId,
                     'timestamp' => '12.12',
                 ]
         ];
@@ -110,9 +138,20 @@ class ClientController extends Controller
         $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
         $id_tag = $request->get('id_tag');
 
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result
+        $UniqueId = str_shuffle($pin);
+
+
         $metadata = [
             'MessageTypeId' => '2',
-            'UniqueId' => '746832',
+            'UniqueId' => $UniqueId,
             'title' => 'MeterValuesRequest',
             'payload' => [
                 'chargepoint' => $cp_id,
@@ -142,9 +181,19 @@ class ClientController extends Controller
         $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
         $id_tag = $request->get('id_tag');
 
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result
+        $UniqueId = str_shuffle($pin);
+
         $metadata = [
             'MessageTypeId' => '2',
-            'UniqueId' => '746832',
+            'UniqueId' => $UniqueId,
             'title' => 'HeartBeatRequest',
             'payload' => [
                 'chargepoint' => $chargepoint,
@@ -175,15 +224,25 @@ class ClientController extends Controller
         $con_id = $request->get('connector');
         $id_tag = $request->get('id_tag');
 
+        $numbers = '0123456789';
+
+        // generate a pin based on 2 * 7 digits + a random character
+        $pin = mt_rand(1000000, 9999999)
+            . mt_rand(1000000, 9999999)
+            . $numbers[rand(0, strlen($numbers) - 1)];
+
+        // shuffle the result
+        $UniqueId = str_shuffle($pin);
+
         $metadata = [
             'MessageTypeId' => '2',
-            'UniqueId' => '746832',
+            'UniqueId' => $UniqueId,
             'title' => 'StopTransactionRequest',
                 'payload' => [
-                    'chargepoint' => $chargepoint,
+                    'chargepoint' => $cp_id,
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,
-                    'meterStop' => '1230',
+                    'meterStop' => '1600',
                     'transactionId' => '1985',
                     'reason' => 'Emergency Stop',
                     'transactionData' => [

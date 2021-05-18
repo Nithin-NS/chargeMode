@@ -114,7 +114,6 @@
                                     name="IdTag"
                                     required
                                     autocomplete="Id Tag"
-                                    autofocus
                                     v-model="id_Tag"
                                 />
                             </div>
@@ -307,6 +306,8 @@ export default {
             this.ws.addEventListener("message", e => {
                 var msg = JSON.parse(e.data);
 
+                var unique_id = msg[1];
+                // console.log(unique_id);
                 console.log(msg);
 
                 switch (msg.title) {
@@ -479,7 +480,8 @@ export default {
             axios
                 .post("/stopCharging", {
                     id_tag: this.id_Tag,
-                    cp_id: this.select_cp
+                    cp_id: this.select_cp,
+                    connector: this.select_connector
                 })
                 .then(
                     function(response) {

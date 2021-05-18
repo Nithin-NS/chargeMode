@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCpConnectorTable extends Migration
+class CreateMsgFilesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,12 @@ class CreateCpConnectorTable extends Migration
      */
     public function up()
     {
-        Schema::create('cp_connector', function (Blueprint $table) {
+        Schema::create('msg_files', function (Blueprint $table) {
             $table->id();
             $table->integer('cp_id');
-            $table->integer('connector_type');
-            $table->integer('status')->default(0)->comment('0-incactive, 1-active');
+            //$table->integer('transaction_id');
+            $table->integer('type')->comment('0-request, 1-response');
+            $table->string('file_path');
             $table->timestamps();
         });
     }
@@ -29,6 +30,6 @@ class CreateCpConnectorTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cp_connector');
+        Schema::dropIfExists('msg_files');
     }
 }
