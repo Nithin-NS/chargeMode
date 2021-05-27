@@ -183,7 +183,9 @@
                                                 type="submit"
                                                 value="Submit"
                                                 id="remoteStart"
-                                                onclick="remoteStart()"
+                                                @click.prevent="
+                                                    remoteStart(user.id)
+                                                "
                                                 class="btn btn-success btn-sm"
                                             >
                                                 Start Transaction
@@ -235,14 +237,14 @@ export default {
             idTag: "",
             error_msg: "",
             elementVisible: false,
-            connection: null,
+            ws: null,
             url: "ws://localhost:8082/"
         };
     },
     created() {
         this.getUserDetails();
         this.findChargePoints();
-        // this.ws = new WebSocket(this.url + this.select_cp);
+        this.ws = new WebSocket(this.url);
 
         // this.ws.addEventListener("open", () => {
         //     console.log("We are connected!..");
@@ -282,45 +284,46 @@ export default {
                 );
         },
 
-        // remoteStart: function(id) {
-        //     if (this.select_connector == "" || this.select_cp == "") {
-        //         // console.log("enter values");
-        //         this.error_msg = "Enter Value";
-        //         this.elementVisible = true;
-        //         setTimeout(function() {
-        //             // Closing the alert
-        //             $("#error_msg").alert("close");
-        //         }, 3000);
-        //     } else {
-        //         console.log("ok");
-        //         var id = id;
-        //         axios
-        //             .post("/remoteStart/" + id, {
-        //                 con_id: this.select_connector,
-        //                 cp_id: this.select_cp
-        //             })
-        //             .then(
-        //                 function(response) {
-        //                     if (response.data) {
-        //                         document.getElementById(
-        //                             "remoteStart_" + id
-        //                         ).style.display = "none";
-        //                         document.getElementById(
-        //                             "remoteStop_" + id
-        //                         ).style.display = "inline-block";
-        //                         $("#transactionModal_" + id).modal("hide");
-        //                         $(".modal-backdrop").remove();
-        //                         console.log(response.data);
-        //                     } else {
-        //                         console.log("No Data");
-        //                     }
-        //                 }.bind(this)
-        //             )
-        //             .catch(error => {
-        //                 console.log(error.response);
-        //             });
-        //     }
-        // },
+        remoteStart: function(id) {
+            if (this.select_connector == "" || this.select_cp == "") {
+                // console.log("enter values");
+                this.error_msg = "Enter Value";
+                this.elementVisible = true;
+                setTimeout(function() {
+                    // Closing the alert
+                    $("#error_msg").alert("close");
+                }, 3000);
+            } else {
+                console.log("ok");
+                var id = id;
+                axios
+                    .post("/remoteStart/" + id, {
+                        con_id: this.select_connector,
+                        cp_id: this.select_cp
+                    })
+                    .then(
+                        function(response) {
+                            if (response.data) {
+                                document.getElementById(
+                                    "remoteStart_" + id
+                                ).style.display = "none";
+                                document.getElementById(
+                                    "remoteStop_" + id
+                                ).style.display = "inline-block";
+                                $("#transactionModal_" + id).modal("hide");
+                                $(".modal-backdrop").remove();
+                                //sending remote start
+                                this.ws.send(JSON.stringify(response.data));
+                            } else {
+                                console.log("No Data");
+                            }
+                        }.bind(this)
+                    )
+                    .catch(error => {
+                        console.log(error.response);
+                    });
+            }
+        },
 
         remoteStop: function(id) {
             var id = id;

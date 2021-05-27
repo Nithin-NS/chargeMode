@@ -80,10 +80,10 @@ class ClientController extends Controller
         $UniqueId = str_shuffle($pin);
 
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => $UniqueId,
-            'title' => 'Authorize',
-                'payload' => [
+            2,
+            $UniqueId,
+            'Authorize',
+                [
                     'idTag' => $tag,
                     'chargepoint' => $chargepoint,
                     'connector' => $con_id
@@ -114,10 +114,10 @@ class ClientController extends Controller
         $reservationId = str_shuffle($pin);
 
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => $UniqueId,
-            'title' => 'StartTransactionRequest',
-                'payload' => [
+            2,
+            $UniqueId,
+            'StartTransactionRequest',
+                [
                     'chargepoint' => $cp_id,
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,
@@ -150,10 +150,10 @@ class ClientController extends Controller
 
 
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => $UniqueId,
-            'title' => 'MeterValuesRequest',
-            'payload' => [
+            2,
+            $UniqueId,
+            'MeterValuesRequest',
+            [
                 'chargepoint' => $cp_id,
                 'connectorId' => $con_id,
                 'transactionId' => "94",
@@ -192,10 +192,10 @@ class ClientController extends Controller
         $UniqueId = str_shuffle($pin);
 
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => $UniqueId,
-            'title' => 'HeartBeatRequest',
-            'payload' => [
+            2,
+            $UniqueId,
+            'HeartBeatRequest',
+            [
                 'chargepoint' => $chargepoint,
                 'connectorId' => $con_id,
                 'transactionId' => "94",
@@ -235,10 +235,10 @@ class ClientController extends Controller
         $UniqueId = str_shuffle($pin);
 
         $metadata = [
-            'MessageTypeId' => '2',
-            'UniqueId' => $UniqueId,
-            'title' => 'StopTransactionRequest',
-                'payload' => [
+            2,
+            $UniqueId,
+            'StopTransactionRequest',
+            [
                     'chargepoint' => $cp_id,
                     'connectorId' => $con_id,
                     'idTag' => $id_tag,

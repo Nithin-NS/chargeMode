@@ -44,6 +44,7 @@ class RemoteOperationController extends Controller
         $metadata = [
             2,
             $UniqueId,
+            'RemoteStartRequest',
             [
                 'chargepoint' => $cp_name,
                 'connectorId' => $con_id,

@@ -308,9 +308,9 @@ export default {
 
                 var unique_id = msg[1];
                 // console.log(unique_id);
-                console.log(msg);
+                // console.log(msg[2]);
 
-                switch (msg.title) {
+                switch (msg[2]) {
                     case "BootNotificationResponse":
                         this.BootNotificationResponse(msg);
                         break;
@@ -334,6 +334,11 @@ export default {
                     case "StopTransactionResponse":
                         console.log("StopTransaction");
                         this.StopTransactionResponse(msg);
+                        break;
+
+                    case "RemoteStartRequest":
+                        console.log("RemoteStartRequest");
+                        // this.StopTransactionResponse(msg);
                         break;
 
                     default:
@@ -381,7 +386,7 @@ export default {
                 .then(
                     function(response) {
                         if (response.data) {
-                            console.log(response.data);
+                            // console.log(response.data);
                             this.ws.send(JSON.stringify(response.data));
                         } else {
                             console.log("No Data");
@@ -498,7 +503,8 @@ export default {
 
         // Bootnotification Responce;
         BootNotificationResponse: function(msg) {
-            if (msg.payload.status == "Accepted") {
+            // console.log(msg[3].status);
+            if (msg[3].status == "Accepted") {
                 document.getElementById("auth").disabled = false;
                 document.getElementById("boot").disabled = true;
                 console.log("Boot Success");
@@ -509,7 +515,8 @@ export default {
 
         // AuthenticateResponse;
         AuthenticateResponse: function(msg) {
-            if (msg.payload.status == "Accepted") {
+            // console.log(msg[3].status);
+            if (msg[3].status == "Accepted") {
                 document.getElementById("auth").disabled = true;
                 document.getElementById("start").disabled = false;
                 console.log("Authentication Success");
@@ -520,7 +527,7 @@ export default {
 
         //Start Transaction Responce
         StartTransactionResponse: function(msg) {
-            if (msg.IdTagInfo.status == "Accepted") {
+            if (msg[3].status == "Accepted") {
                 this.val = "start";
                 document.getElementById("stop").disabled = false;
                 document.getElementById("start").disabled = true;

@@ -27,6 +27,7 @@ class AdminNotificationController extends Controller
             $metadata = [
                 'MessageTypeId' => '3',
                 'UniqueId' => '746832',
+                'title' => 'BootNotificationResponse',
                 'payload' => [
                     'status' => 'Accepted',
                     'currenTime' => $mytime->toDateTimeString(),
@@ -44,6 +45,7 @@ class AdminNotificationController extends Controller
             $metadata = [
                 'MessageTypeId' => '3',
                 'UniqueId' => '746832',
+                'title' => 'BootNotificationResponse',
                 'payload' => [
                     'status' => 'Rejected',
                     'currenTime' => $mytime->toDateTimeString(),
@@ -65,6 +67,7 @@ class AdminNotificationController extends Controller
             $metadata = [
                 'MessageTypeId' => '3',
                 'UniqueId' => '746832',
+                'title' =>  'AuthenticateResponse',
                 'payload' => [
                     'expiryDate' => $mytime->toDateTimeString(),
                     'parentIdTag' => '15478',
@@ -105,6 +108,7 @@ class AdminNotificationController extends Controller
         $metadata = [
             'MessageTypeId' => '3',
             'UniqueId' => '746832',
+            'title' =>  'StartTransactionResponse',
             'payload' => [
                 'expiryDate' => $mytime->toDateTimeString(),
                 'parentIdTag' => '15478',

@@ -79,7 +79,8 @@
 <!-- Scripts -->
 <script src="{{ asset('/assets/vendor/breakpoints/breakpoints.js', config('app.asset_secure')) }}"></script>
 
-<script type="text/javascript" src="{{ asset('/js/remote.js', config('app.asset_secure')) }}"></script>
+{{-- <script type="text/javascript" src="{{ asset('../remote.js', config('app.asset_secure')) }}"></script> --}}
+{{-- <script type="text/javascript" src="../../../../remote.js"></script> --}}
 
 <script>
   Breakpoints();

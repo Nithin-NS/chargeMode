@@ -19,7 +19,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="message in messages" :key="message[0]">
+                            <tr v-for="message in messages" :key="message">
                                 <td>1</td>
                                 <td>21-05</td>
                                 <td>

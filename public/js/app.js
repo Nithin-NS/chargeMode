@@ -2362,10 +2362,9 @@ __webpack_require__.r(__webpack_exports__);
       _this.ws.addEventListener("message", function (e) {
         var msg = JSON.parse(e.data);
         var unique_id = msg[1]; // console.log(unique_id);
+        // console.log(msg[2]);
 
-        console.log(msg);
-
-        switch (msg.title) {
+        switch (msg[2]) {
           case "BootNotificationResponse":
             _this.BootNotificationResponse(msg);
 
@@ -2395,6 +2394,11 @@ __webpack_require__.r(__webpack_exports__);
             console.log("StopTransaction");
 
             _this.StopTransactionResponse(msg);
+
+            break;
+
+          case "RemoteStartRequest":
+            console.log("RemoteStartRequest"); // this.StopTransactionResponse(msg);
 
             break;
 
@@ -2430,7 +2434,7 @@ __webpack_require__.r(__webpack_exports__);
         chargeBoxSerialNumber: this.select_cb_serial
       }).then(function (response) {
         if (response.data) {
-          console.log(response.data);
+          // console.log(response.data);
           this.ws.send(JSON.stringify(response.data));
         } else {
           console.log("No Data");
@@ -2513,7 +2517,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     // Bootnotification Responce;
     BootNotificationResponse: function BootNotificationResponse(msg) {
-      if (msg.payload.status == "Accepted") {
+      // console.log(msg[3].status);
+      if (msg[3].status == "Accepted") {
         document.getElementById("auth").disabled = false;
         document.getElementById("boot").disabled = true;
         console.log("Boot Success");
@@ -2523,7 +2528,8 @@ __webpack_require__.r(__webpack_exports__);
     },
     // AuthenticateResponse;
     AuthenticateResponse: function AuthenticateResponse(msg) {
-      if (msg.payload.status == "Accepted") {
+      // console.log(msg[3].status);
+      if (msg[3].status == "Accepted") {
         document.getElementById("auth").disabled = true;
         document.getElementById("start").disabled = false;
         console.log("Authentication Success");
@@ -2533,7 +2539,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     //Start Transaction Responce
     StartTransactionResponse: function StartTransactionResponse(msg) {
-      if (msg.IdTagInfo.status == "Accepted") {
+      if (msg[3].status == "Accepted") {
         this.val = "start";
         document.getElementById("stop").disabled = false;
         document.getElementById("start").disabled = true;
@@ -2936,6 +2942,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -2948,14 +2956,14 @@ __webpack_require__.r(__webpack_exports__);
       idTag: "",
       error_msg: "",
       elementVisible: false,
-      connection: null,
+      ws: null,
       url: "ws://localhost:8082/"
     };
   },
   created: function created() {
     this.getUserDetails();
-    this.findChargePoints(); // this.ws = new WebSocket(this.url + this.select_cp);
-    // this.ws.addEventListener("open", () => {
+    this.findChargePoints();
+    this.ws = new WebSocket(this.url); // this.ws.addEventListener("open", () => {
     //     console.log("We are connected!..");
     //     this.ws.addEventListener("message", e => {});
     // });
@@ -2981,45 +2989,37 @@ __webpack_require__.r(__webpack_exports__);
         this.connectors = response.data; // console.log(response.data);
       }.bind(this));
     },
-    // remoteStart: function(id) {
-    //     if (this.select_connector == "" || this.select_cp == "") {
-    //         // console.log("enter values");
-    //         this.error_msg = "Enter Value";
-    //         this.elementVisible = true;
-    //         setTimeout(function() {
-    //             // Closing the alert
-    //             $("#error_msg").alert("close");
-    //         }, 3000);
-    //     } else {
-    //         console.log("ok");
-    //         var id = id;
-    //         axios
-    //             .post("/remoteStart/" + id, {
-    //                 con_id: this.select_connector,
-    //                 cp_id: this.select_cp
-    //             })
-    //             .then(
-    //                 function(response) {
-    //                     if (response.data) {
-    //                         document.getElementById(
-    //                             "remoteStart_" + id
-    //                         ).style.display = "none";
-    //                         document.getElementById(
-    //                             "remoteStop_" + id
-    //                         ).style.display = "inline-block";
-    //                         $("#transactionModal_" + id).modal("hide");
-    //                         $(".modal-backdrop").remove();
-    //                         console.log(response.data);
-    //                     } else {
-    //                         console.log("No Data");
-    //                     }
-    //                 }.bind(this)
-    //             )
-    //             .catch(error => {
-    //                 console.log(error.response);
-    //             });
-    //     }
-    // },
+    remoteStart: function remoteStart(id) {
+      if (this.select_connector == "" || this.select_cp == "") {
+        // console.log("enter values");
+        this.error_msg = "Enter Value";
+        this.elementVisible = true;
+        setTimeout(function () {
+          // Closing the alert
+          $("#error_msg").alert("close");
+        }, 3000);
+      } else {
+        console.log("ok");
+        var id = id;
+        axios.post("/remoteStart/" + id, {
+          con_id: this.select_connector,
+          cp_id: this.select_cp
+        }).then(function (response) {
+          if (response.data) {
+            document.getElementById("remoteStart_" + id).style.display = "none";
+            document.getElementById("remoteStop_" + id).style.display = "inline-block";
+            $("#transactionModal_" + id).modal("hide");
+            $(".modal-backdrop").remove(); //sending remote start
+
+            this.ws.send(JSON.stringify(response.data));
+          } else {
+            console.log("No Data");
+          }
+        }.bind(this))["catch"](function (error) {
+          console.log(error.response);
+        });
+      }
+    },
     remoteStop: function remoteStop(id) {
       var id = id;
       console.log(id);
@@ -39556,7 +39556,7 @@ var render = function() {
               _c(
                 "tbody",
                 _vm._l(_vm.messages, function(message) {
-                  return _c("tr", { key: message[0] }, [
+                  return _c("tr", { key: message }, [
                     _c("td", [_vm._v("1")]),
                     _vm._v(" "),
                     _c("td", [_vm._v("21-05")]),
@@ -39997,7 +39997,49 @@ var render = function() {
                             )
                           ]),
                           _vm._v(" "),
-                          _vm._m(3, true)
+                          _c("div", { staticClass: "modal-footer" }, [
+                            _c("div", { staticClass: "col-md-8 offset-2" }, [
+                              _c(
+                                "button",
+                                {
+                                  staticClass:
+                                    "btn btn-sm btn-outline-secondary",
+                                  attrs: {
+                                    type: "button",
+                                    "data-dismiss": "modal"
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                            Close\n                                        "
+                                  )
+                                ]
+                              ),
+                              _vm._v(" "),
+                              _c(
+                                "button",
+                                {
+                                  staticClass: "btn btn-success btn-sm",
+                                  attrs: {
+                                    type: "submit",
+                                    value: "Submit",
+                                    id: "remoteStart"
+                                  },
+                                  on: {
+                                    click: function($event) {
+                                      $event.preventDefault()
+                                      return _vm.remoteStart(user.id)
+                                    }
+                                  }
+                                },
+                                [
+                                  _vm._v(
+                                    "\n                                            Start Transaction\n                                        "
+                                  )
+                                ]
+                              )
+                            ])
+                          ])
                         ])
                       ]
                     )
@@ -40034,7 +40076,7 @@ var render = function() {
                 ])
               ]),
               _vm._v(" "),
-              _vm._m(4, true)
+              _vm._m(3, true)
             ])
           })
         ],
@@ -40140,45 +40182,6 @@ var staticRenderFns = [
           )
         ]
       )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-footer" }, [
-      _c("div", { staticClass: "col-md-8 offset-2" }, [
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-sm btn-outline-secondary",
-            attrs: { type: "button", "data-dismiss": "modal" }
-          },
-          [
-            _vm._v(
-              "\n                                            Close\n                                        "
-            )
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-success btn-sm",
-            attrs: {
-              type: "submit",
-              value: "Submit",
-              id: "remoteStart",
-              onclick: "remoteStart()"
-            }
-          },
-          [
-            _vm._v(
-              "\n                                            Start Transaction\n                                        "
-            )
-          ]
-        )
-      ])
     ])
   },
   function() {

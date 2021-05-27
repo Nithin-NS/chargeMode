@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-const remotejs = require('./public/js/remote.js');
+const remotejs = require('./remote.js');
 
 var fs = require('fs');
 
@@ -89,6 +89,11 @@ wss.on("connection", ws => {
                 console.log('StopTransaction');
                 StopTransaction(msg);
                 break;
+
+            case "RemoteStartRequest":
+                // console.log('RemoteStartRequest');
+                RemoteStartRequest(msg);
+                break;
               
             default:
                 var text = "No value found";
@@ -168,6 +173,7 @@ wss.on("connection", ws => {
                     var metadata = [
                         3,
                         uniqid,
+                        'BootNotificationResponse',
                         {
                             currenTime: datetime,
                             interval: "15",
@@ -224,6 +230,7 @@ wss.on("connection", ws => {
                     var metadata = [
                         3,
                         uniqid,
+                        'BootNotificationResponse',
                         {
                             currenTime: datetime,
                             interval: "15",
@@ -278,6 +285,7 @@ wss.on("connection", ws => {
     //Authenticate Function
     function authentication(msg){
         console.log('Inside Auth');
+        // console.log(msg);
         var data = msg;
         var idTag = data[3].idTag;
         var chargepoint = data[3].chargepoint;
@@ -303,7 +311,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    // "AuthenticateResponse",
+                    "AuthenticateResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -319,7 +327,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    // title:"AuthenticateResponse",
+                    "AuthenticateResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -369,7 +377,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    // "StartTransactionResponse",
+                    "StartTransactionResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -391,7 +399,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    // title:"StartTransactionResponse",
+                    "StartTransactionResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -432,14 +440,14 @@ wss.on("connection", ws => {
             console.log("metervalue record inserted");
         });
 
-        var metadata = {
-            MessagetypeId:"3",
-            UniqueId: uniqid,
-            title:"MeterValuesResponse",
-            payload:{
+        var metadata = [
+            3,
+            uniqid,
+            "MeterValuesResponse",
+            {
                 status: 'success'
             }
-        };
+        ];
         ws.send(JSON.stringify(metadata));
     }//End of metervalues
 
@@ -448,14 +456,14 @@ wss.on("connection", ws => {
         var data = msg;
         var uniqid = data[1];
 
-        var metadata =  {
-            MessagetypeId:"3",
-            UniqueId: uniqid,
-            title:"HeartBeatResponse",
-            payload:{
+        var metadata =  [
+            3,
+            uniqid,
+            "HeartBeatResponse",
+            {
                 currentTime: '02-04-21' 
             }
-        };
+        ];
         ws.send(JSON.stringify(metadata));
     }
     
@@ -490,20 +498,37 @@ wss.on("connection", ws => {
             console.log('Transactions Updated');
         });
 
-        var metadata = {
-            MessageTypeId:"3",
-            UniqueId: uniqid,
-            title:"StopTransactionResponse",
-            IdTagInfo:{
+        var metadata = [
+            3,
+            uniqid,
+            "StopTransactionResponse",
+            {
                 expiryDate:"2021-3-8T3.00PM",
                 parentIdTag:"170443",
                 status:"Accepted"
             },
-            transactionId:"2468"
-        };
+            2468,
+        ];
         ws.send(JSON.stringify(metadata));
         // ws.terminate();
     }//End of Stop Transaction
+
+    //remote start transaction
+    function RemoteStartRequest(msg){
+        var data = msg;
+        // console.log(data);
+        // var uniqid = data[1];
+
+        // var metadata =  [
+        //     3,
+        //     uniqid,
+        //     "HeartBeatResponse",
+        //     {
+        //         currentTime: '02-04-21' 
+        //     }
+        // ];
+        ws.send(JSON.stringify(data));
+    }
 
     ws.on("close", () => {
         console.log('Client Has Disconnected..');
