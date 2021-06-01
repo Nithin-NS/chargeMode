@@ -290,7 +290,7 @@ export default {
             beatInterval: "",
             meterInterval: "",
             ws: null,
-            url: "ws://localhost:8082/",
+            url: "ws://13.235.71.38:8082/",
             e: "",
             val: ""
         };
