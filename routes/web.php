@@ -124,6 +124,7 @@ Route::group(['middleware'=>['auth:admin']], function()
     //Message Routes
     Route::get('/admin/messages', 'App\Http\Controllers\StationMessageController@index')->name('messages');  
     Route::get('/getDeviceMessages', 'App\Http\Controllers\StationMessageController@getDeviceMessages')->name('getDeviceMessages');  
+    Route::get('/clearDeviceMessages', 'App\Http\Controllers\StationMessageController@clearDeviceMessages')->name('clearDeviceMessages');  
 
     //Remote Operations Routes
 	Route::get('/findConnectors','App\Http\Controllers\RemoteOperationController@findConnectors')->name('findConnectors');

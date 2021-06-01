@@ -18,32 +18,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const server = http.createServer(app);
 
-// app.post('/remoteStart', (req, res)=>{
-//     calling.aFunction();
-//     res.send('A message!');
-// });
-
-// remotejs.remote();
-
-const dir = './storage/device_messages';
-
-try {
-        if (!fs.existsSync(dir)){
-            fs.mkdir(path.join(__dirname, dir), (err) => {
-                if (err) {
-                    return console.error(err);
-                }
-                console.log('Directory created successfully!');
-            });
-        }
-        else{
-            console.log('Directory Exists!');
-        }
-    } 
-catch (err) {
-            console.error(err);
-    }
-
 const wss = new WebSocket.Server({ port: 8082 });
 
 wss.on("connection", ws => {
@@ -118,9 +92,6 @@ wss.on("connection", ws => {
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
 
-        //setting the path
-        const path = './storage/device_messages/messages.json';
-
         //setting device message to save in json
         var json_msg = {
             'id': uniqid,
@@ -130,47 +101,18 @@ wss.on("connection", ws => {
             'message': data
         };
 
-        //Convert it from an object to a string with JSON.stringify
-        var json = JSON.stringify(json_msg,null, 2);
-
-        //Check the file exist or not create it, and use fs to write the file to disk
-        try {
-            if (fs.existsSync(path)) {
-                //file exist
-                console.log("File exists.");
-                fs.readFile(path, 'utf8', function readFileCallback(err, data){
-                    if (err){
-                        console.log(err);
-                    } else {
-                    // obj = JSON.parse(data); //now it an object
-                    // obj.table.push(msg); //add some data
-                    json = JSON.stringify(json_msg,null, 2); //convert it back to json
-                    // json = msg; //convert it back to json
-                    fs.appendFileSync(path, json, 'utf8', function(err){
-                        console.log(err);
-                    }); // write it back 
-                }});
-            } else {
-                //file not exist
-                console.log("File does not exist.");
-                fs.writeFile(path, json, 'utf8', function(err){
-                    if (err) {
-                        return console.log(err);
-                    }
-                    console.log('Json file generated succesfully.');
-                });
-            }
-          } catch(err) {
-            console.error(err)
-        }
-        //end of json file save section
-
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
             user: "root",
             password: "",
             database: "chargemode_websockets"
+        });
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("Bootnotification Request Inserted");
         });
 
         var queryString = "SELECT * FROM chargepoints WHERE CP_Name = ?;"
@@ -191,52 +133,11 @@ wss.on("connection", ws => {
                     ];
                     console.log(metadata);
 
-                    //setting the path
-                    const path = './storage/device_messages/messages.json';
-
-                    //setting device message to save in json
-                    var json_msg = {
-                        'id': uniqid,
-                        'date': date,
-                        'station': cp_name,
-                        'type': "out",
-                        'message': metadata
-                    };
-
-                    //Convert it from an object to a string with JSON.stringify
-                    var json = JSON.stringify(json_msg,null, 2);
-
-                    //Check the file exist or not create it, and use fs to write the file to disk
-                    try {
-                        if (fs.existsSync(path)) {
-                            //file exist
-                            console.log("File exists.");
-                            fs.readFile(path, 'utf8', function readFileCallback(err, data){
-                                if (err){
-                                    console.log(err);
-                                } else {
-                                // obj = JSON.parse(data); //now it an object
-                                // obj.table.push(msg); //add some data
-                                json = JSON.stringify(json_msg,null, 2); //convert it back to json
-                                // json = msg; //convert it back to json
-                                fs.appendFileSync(path, json, 'utf8', function(err){
-                                    console.log(err);
-                                }); // write it back 
-                            }});
-                        } else {
-                            //file not exist
-                            console.log("File does not exist.");
-                            fs.writeFile(path, json, 'utf8', function(err){
-                                if (err) {
-                                    return console.log(err);
-                                }
-                                console.log('Json file generated succesfully.');
-                            });
-                        }
-                      } catch(err) {
-                        console.error(err)
-                    }
-                    //end of json file save section
+                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                            console.log("Bootnotification Responce(Rejected) Inserted");
+                    });
 
                     // Sending responce with status Rejected
                     ws.send(JSON.stringify(metadata));
@@ -257,52 +158,11 @@ wss.on("connection", ws => {
                     ];
                     console.log(metadata);
 
-                    //setting the path
-                    const path = './storage/device_messages/messages.json';
-
-                    //setting device message to save in json
-                    var json_msg = {
-                        'id': uniqid,
-                        'date': date,
-                        'station': cp_name,
-                        'type': "out",
-                        'message': metadata
-                    };
-
-                    //Convert it from an object to a string with JSON.stringify
-                    var json = JSON.stringify(json_msg,null, 2);
-
-                    //Check the file exist or not create it, and use fs to write the file to disk
-                    try {
-                        if (fs.existsSync(path)) {
-                            //file exist
-                            console.log("File exists.");
-                            fs.readFile(path, 'utf8', function readFileCallback(err, data){
-                                if (err){
-                                    console.log(err);
-                                } else {
-                                // obj = JSON.parse(data); //now it an object
-                                // obj.table.push(msg); //add some data
-                                json = JSON.stringify(json_msg,null, 2); //convert it back to json
-                                // json = msg; //convert it back to json
-                                fs.appendFileSync(path, json, 'utf8', function(err){
-                                    console.log(err);
-                                }); // write it back 
-                            }});
-                        } else {
-                            //file not exist
-                            console.log("File does not exist.");
-                            fs.writeFile(path, json, 'utf8', function(err){
-                                if (err) {
-                                    return console.log(err);
-                                }
-                                console.log('Json file generated succesfully.');
-                            });
-                        }
-                    } catch(err) {
-                        console.error(err)
-                    }
-                    //end of json file save section
+                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                            console.log("Bootnotification Responce(Accepted) Inseted..");
+                    });
 
                     ws.send(JSON.stringify(metadata));
                 }
@@ -318,6 +178,11 @@ wss.on("connection", ws => {
         var chargepoint = data[3].chargepoint;
         var connector = data[3].connector;
         var uniqid = data[1];
+
+        var date = new Date();
+        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        var datetime = fullDate+' '+time;
         
         console.log(idTag + ' | ' + chargepoint + ' | ' + connector);
 
@@ -327,6 +192,12 @@ wss.on("connection", ws => {
             user: "root",
             password: "",
             database: "chargemode_websockets"
+        });
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("Authentication Request Inserted..");
         });
 
         var sql = 'SELECT * FROM users WHERE user_id = ' + mysql.escape(idTag);
@@ -345,6 +216,13 @@ wss.on("connection", ws => {
                         status:"Invalid"
                     }
                 ];
+
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                    console.log("Authentication responce(Invalid) Inserted..");
+                });
+
                 //Sending Responce with status Invalid
                 console.log(JSON.stringify(metadata));
                 ws.send(JSON.stringify(metadata));
@@ -361,6 +239,13 @@ wss.on("connection", ws => {
                         status:"Accepted"
                     }
                 ];
+
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                    console.log("Authentication responce(Accepted) Inserted..");
+                });
+
                 //Sending Responce with Status Accepted
                 console.log(JSON.stringify(metadata));
                 ws.send(JSON.stringify(metadata));
@@ -394,6 +279,13 @@ wss.on("connection", ws => {
             password: "",
             database: "chargemode_websockets"
         });
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("StartTransaction Request Inserted..");
+        });
+
         var sql = 'SELECT * FROM connectors WHERE id = ' + mysql.escape(connectorid);
         con.query(sql, function (err, result) {
             if (err) throw err;
@@ -412,6 +304,12 @@ wss.on("connection", ws => {
                     },
                     transactionId="2468"
                 ];
+
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                    console.log("StartTransaction Responce(Invalid) Inserted..");
+                });
                 ws.send(JSON.stringify(metadata));
             }
             else{
@@ -434,6 +332,11 @@ wss.on("connection", ws => {
                     },
                     transactionId="2468"
                 ];
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    con.query(sql, function (err, result) {
+                        if (err) throw err;
+                    console.log("StartTransaction Responce(Accepted) Inserted..");
+                });
                 ws.send(JSON.stringify(metadata));
             }
         });
@@ -460,6 +363,12 @@ wss.on("connection", ws => {
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
 
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("MeterValues Request Inserted..");
+        });
+
         //Insert a record in the "metervalue" table:
         var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+datetime+"','235265','53')";
         con.query(sql, function (err, result) {
@@ -475,6 +384,12 @@ wss.on("connection", ws => {
                 status: 'success'
             }
         ];
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("MeterValues Responce Inserted..");
+        });
         ws.send(JSON.stringify(metadata));
     }//End of metervalues
 
@@ -482,6 +397,26 @@ wss.on("connection", ws => {
     function HeartBeat(msg){
         var data = msg;
         var uniqid = data[1];
+        var chargepoint = 'unknown';
+
+        var date = new Date();
+        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        var datetime = fullDate+' '+time;
+
+        var mysql = require('mysql');
+        var con = mysql.createConnection({
+            host: "localhost",
+            user: "root",
+            password: "",
+            database: "chargemode_websockets"
+        });
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("HeartBeat Request Inserted..");
+        });
 
         var metadata =  [
             3,
@@ -491,6 +426,12 @@ wss.on("connection", ws => {
                 currentTime: '02-04-21' 
             }
         ];
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("HeartBeat Request Inserted..");
+        });
         ws.send(JSON.stringify(metadata));
     }
     
@@ -519,6 +460,12 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("StopTransaction Request Inserted..");
+        });
+
         var sql = 'UPDATE transactions SET Trans_Meter_Stop = ? WHERE Connector_ID = ? AND CP_ID = ?';
         
         con.query(sql,[meterStop, connectorId, chargepoint], function(err,rows,fields) { 
@@ -536,6 +483,11 @@ wss.on("connection", ws => {
             },
             2468,
         ];
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("StopTransaction Request Inserted..");
+        });
         ws.send(JSON.stringify(metadata));
         // ws.terminate();
     }//End of Stop Transaction

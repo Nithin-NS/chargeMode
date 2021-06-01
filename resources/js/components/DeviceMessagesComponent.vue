@@ -1,52 +1,67 @@
 <template>
     <div class="row">
+        <div class="col-md-4">
+            <button
+                type="submit"
+                value="Submit"
+                id="remoteStart"
+                @click.prevent="clearMessages()"
+                class="btn btn-success btn-sm"
+            >
+                Clear Messages
+            </button>
+        </div>
+        <div class="col-md-8">
+            <div class="alert alert-primary" role="alert" v-if="msg">
+                {{ msg }}
+            </div>
+            <span class=""> </span>
+        </div>
         <div class="col-12">
-            <div class="panel">
-                <div class="panel-body">
-                    <table
-                        class="table table-hover dataTable table-striped w-full"
-                        data-plugin="dataTable"
-                        id="msg_table"
-                    >
-                        <thead class="thead-dark">
-                            <tr>
-                                <th>ID</th>
-                                <th>Date</th>
-                                <th>Station</th>
-                                <th>Status</th>
-                                <th>Type</th>
-                                <th>Message</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-for="message in messages" :key="message">
-                                <td>1</td>
-                                <td>21-05</td>
-                                <td>
-                                    <span class="">{{ message[1] }}</span>
-                                </td>
-                                <td>
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">U-ID</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Station</th>
+                        <th scope="col">Type</th>
+                        <th scope="col">Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr :key="message['id']" v-for="message in messages">
+                        <td>{{ message["uid"] }}</td>
+                        <td>{{ message["date"] }}</td>
+                        <td>
+                            <span class="">{{ message["station"] }}</span>
+                        </td>
+                        <!-- <td>
                                     <span
                                         class="badge"
                                         style="background-color: green;color:white;"
                                         >Active</span
                                     >
-                                </td>
-                                <td>
-                                    <span
-                                        class="badge"
-                                        style="background-color: red;color:white;"
-                                        >Out</span
-                                    >
-                                </td>
-                                <td>
-                                    <span>{{ message[3] }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                                </td> -->
+                        <td v-if="message['type'] === 'in'">
+                            <span
+                                class="badge"
+                                style="background-color: green;color:white;"
+                                >{{ message["type"] }}</span
+                            >
+                        </td>
+                        <td v-else>
+                            <span
+                                class="badge"
+                                style="background-color: red;color:white;"
+                                >{{ message["type"] }}</span
+                            >
+                        </td>
+                        <td>
+                            <span>{{ message["message"] }}</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </template>
@@ -55,7 +70,8 @@
 export default {
     data: function() {
         return {
-            messages: []
+            messages: [],
+            msg: ""
         };
     },
     mounted() {
@@ -69,7 +85,15 @@ export default {
             axios.get("/getDeviceMessages").then(
                 function(response) {
                     this.messages = response.data;
-                    console.log(this.messages);
+                    // console.log(this.messages);
+                }.bind(this)
+            );
+        },
+        clearMessages: function() {
+            axios.get("/clearDeviceMessages").then(
+                function(response) {
+                    this.msg = response.data;
+                    this.messages = [];
                 }.bind(this)
             );
         }

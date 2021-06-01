@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\MsgFile;
 use Illuminate\Support\Facades\Storage;
+use App\Models\DeviceMessage;
 
 class StationMessageController extends Controller
 {
@@ -20,10 +21,14 @@ class StationMessageController extends Controller
 
     public function getDeviceMessages()
     {
-        $path = "/public/device_messages/messages.json";
+        $devicemessage = DeviceMessage::orderBy('date', 'DESC')->get();
+        return $devicemessage;
+    }
 
-        $json = json_decode(file_get_contents($path), true);
+    public function clearDeviceMessages()
+    {
+        DeviceMessage::truncate();
 
-        return $json;
+        return "All Messages Cleared From DB";
     }
 }

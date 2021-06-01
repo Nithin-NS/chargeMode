@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class Connectors extends Migration
+class DeviceMessages extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,13 @@ class Connectors extends Migration
      */
     public function up()
     {
-        Schema::create('connectors', function (Blueprint $table) {
+        Schema::create('device_messages', function (Blueprint $table) {
             $table->id();
-            $table->string('Type');
-            $table->string('Remarks');
+            $table->string('uid');
+            $table->string('date');
+            $table->string('station');
+            $table->string('type');
+            $table->string('message');
             $table->timestamps();
         });
     }
@@ -28,7 +31,6 @@ class Connectors extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('connectors');
-        
+        Schema::dropIfExists('device_messages');
     }
 }

@@ -13,7 +13,7 @@ class CustomerController extends Controller
         $data = User::all();
         $chargepoints = ChargePoint::all();
         // dd($chargepoints);
-        return view('pages.Customers.index')->with('data', $data)->with('chargepoints', $chargepoints);
+        return view('pages.customers.index')->with('data', $data)->with('chargepoints', $chargepoints);
     }
 
     public function getUserDetails(){
@@ -28,7 +28,7 @@ class CustomerController extends Controller
 
     public function create()
     {
-        return view('pages.Customers.create');
+        return view('pages.customers.create');
     }
 
     public function store(Request $request)
@@ -134,6 +134,6 @@ class CustomerController extends Controller
             ->orderBy('name')
             ->paginate(20);
 
-        return view('pages.Customers.index')->with('data',$data);
+        return view('pages.customers.index')->with('data',$data);
     }
 }

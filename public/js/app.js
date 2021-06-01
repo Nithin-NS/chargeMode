@@ -2651,10 +2651,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      messages: []
+      messages: [],
+      msg: ""
     };
   },
   mounted: function mounted() {
@@ -2666,8 +2682,13 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     getDeviceMessages: function getDeviceMessages() {
       axios.get("/getDeviceMessages").then(function (response) {
-        this.messages = response.data;
-        console.log(this.messages);
+        this.messages = response.data; // console.log(this.messages);
+      }.bind(this));
+    },
+    clearMessages: function clearMessages() {
+      axios.get("/clearDeviceMessages").then(function (response) {
+        this.msg = response.data;
+        this.messages = [];
       }.bind(this));
     }
   }
@@ -39541,40 +39562,82 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "row" }, [
-    _c("div", { staticClass: "col-12" }, [
-      _c("div", { staticClass: "panel" }, [
-        _c("div", { staticClass: "panel-body" }, [
-          _c(
-            "table",
-            {
-              staticClass: "table table-hover dataTable table-striped w-full",
-              attrs: { "data-plugin": "dataTable", id: "msg_table" }
-            },
-            [
-              _vm._m(0),
-              _vm._v(" "),
-              _c(
-                "tbody",
-                _vm._l(_vm.messages, function(message) {
-                  return _c("tr", { key: message }, [
-                    _c("td", [_vm._v("1")]),
-                    _vm._v(" "),
-                    _c("td", [_vm._v("21-05")]),
-                    _vm._v(" "),
-                    _c("td", [_c("span", {}, [_vm._v(_vm._s(message[1]))])]),
-                    _vm._v(" "),
-                    _vm._m(1, true),
-                    _vm._v(" "),
-                    _vm._m(2, true),
-                    _vm._v(" "),
-                    _c("td", [_c("span", [_vm._v(_vm._s(message[3]))])])
-                  ])
-                }),
-                0
-              )
-            ]
+    _c("div", { staticClass: "col-md-4" }, [
+      _c(
+        "button",
+        {
+          staticClass: "btn btn-success btn-sm",
+          attrs: { type: "submit", value: "Submit", id: "remoteStart" },
+          on: {
+            click: function($event) {
+              $event.preventDefault()
+              return _vm.clearMessages()
+            }
+          }
+        },
+        [_vm._v("\n            Clear Messages\n        ")]
+      )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "col-md-8" }, [
+      _vm.msg
+        ? _c(
+            "div",
+            { staticClass: "alert alert-primary", attrs: { role: "alert" } },
+            [_vm._v("\n            " + _vm._s(_vm.msg) + "\n        ")]
           )
-        ])
+        : _vm._e(),
+      _vm._v(" "),
+      _c("span", {})
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "col-12" }, [
+      _c("table", { staticClass: "table table-bordered" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c(
+          "tbody",
+          _vm._l(_vm.messages, function(message) {
+            return _c("tr", { key: message["id"] }, [
+              _c("td", [_vm._v(_vm._s(message["uid"]))]),
+              _vm._v(" "),
+              _c("td", [_vm._v(_vm._s(message["date"]))]),
+              _vm._v(" "),
+              _c("td", [_c("span", {}, [_vm._v(_vm._s(message["station"]))])]),
+              _vm._v(" "),
+              message["type"] === "in"
+                ? _c("td", [
+                    _c(
+                      "span",
+                      {
+                        staticClass: "badge",
+                        staticStyle: {
+                          "background-color": "green",
+                          color: "white"
+                        }
+                      },
+                      [_vm._v(_vm._s(message["type"]))]
+                    )
+                  ])
+                : _c("td", [
+                    _c(
+                      "span",
+                      {
+                        staticClass: "badge",
+                        staticStyle: {
+                          "background-color": "red",
+                          color: "white"
+                        }
+                      },
+                      [_vm._v(_vm._s(message["type"]))]
+                    )
+                  ]),
+              _vm._v(" "),
+              _c("td", [_c("span", [_vm._v(_vm._s(message["message"]))])])
+            ])
+          }),
+          0
+        )
       ])
     ])
   ])
@@ -39586,48 +39649,16 @@ var staticRenderFns = [
     var _c = _vm._self._c || _h
     return _c("thead", { staticClass: "thead-dark" }, [
       _c("tr", [
-        _c("th", [_vm._v("ID")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("U-ID")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Date")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Date")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Station")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Station")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Status")]),
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Type")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Type")]),
-        _vm._v(" "),
-        _c("th", [_vm._v("Message")])
+        _c("th", { attrs: { scope: "col" } }, [_vm._v("Message")])
       ])
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c(
-        "span",
-        {
-          staticClass: "badge",
-          staticStyle: { "background-color": "green", color: "white" }
-        },
-        [_vm._v("Active")]
-      )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("td", [
-      _c(
-        "span",
-        {
-          staticClass: "badge",
-          staticStyle: { "background-color": "red", color: "white" }
-        },
-        [_vm._v("Out")]
-      )
     ])
   }
 ]
