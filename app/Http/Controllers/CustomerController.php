@@ -109,7 +109,9 @@ class CustomerController extends Controller
             // 'Trans_Meter_Stop' => $request->Trans_Meter_Stop,
         ]);
 
-        return redirect(route('customers'))->with('success','Updated Successfully');;
+        // return redirect(route('customers'))->with('success','Updated Successfully');
+        // return redirect(route('customers'))->with('success','Updated Successfully');
+        return redirect()->route('customers', ['success' => 'Updated Successfully']);
     }
 
     public function destroy($id)

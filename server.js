@@ -92,11 +92,20 @@ wss.on("connection", ws => {
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
 
+        //setting device message to save in json
+        var json_msg = {
+            'id': uniqid,
+            'date': date,
+            'station': cp_name,
+            'type': "in",
+            'message': data
+        };
+
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
@@ -180,8 +189,8 @@ wss.on("connection", ws => {
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
@@ -266,8 +275,8 @@ wss.on("connection", ws => {
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
@@ -344,8 +353,8 @@ wss.on("connection", ws => {
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
@@ -398,8 +407,8 @@ wss.on("connection", ws => {
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
@@ -446,8 +455,8 @@ wss.on("connection", ws => {
         var mysql = require('mysql');
         var con = mysql.createConnection({
             host: "localhost",
-            user: "ubuntu",
-            password: "admin@123",
+            user: "root",
+            password: "",
             database: "chargemode_websockets"
         });
 
