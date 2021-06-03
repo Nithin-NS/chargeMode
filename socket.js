@@ -1,7 +1,5 @@
 const WebSocket = require('ws');
 
-const remotejs = require('./remote.js');
-
 var fs = require('fs');
 
 const path = require('path');
@@ -11,8 +9,6 @@ const express = require('express');
 const app = express();
 
 const http = require('http');
-
-const port = 8000;
 
 app.use(express.urlencoded({ extended: true }));
 
