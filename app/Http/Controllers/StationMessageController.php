@@ -21,7 +21,7 @@ class StationMessageController extends Controller
 
     public function getDeviceMessages()
     {
-        $devicemessage = DeviceMessage::orderBy('date', 'DESC')->get();
+        $devicemessage = DeviceMessage::orderBy('id', 'DESC')->get();
         return $devicemessage;
     }
 

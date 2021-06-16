@@ -239,6 +239,8 @@ export default {
             elementVisible: false,
             ws: null,
             url: "ws://65.2.153.255:8082/"
+            // url: "ws://202.164.137.201:8080/"
+            // url: "ws://157.44.175.57:80/"
         };
     },
     created() {
@@ -285,7 +287,8 @@ export default {
         },
 
         remoteStart: function(id) {
-            if (this.select_connector == "" || this.select_cp == "") {
+            // if (this.select_connector == "" || this.select_cp == "") {
+            if (this.select_cp == "") {
                 // console.log("enter values");
                 this.error_msg = "Enter Value";
                 this.elementVisible = true;

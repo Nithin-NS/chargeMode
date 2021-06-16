@@ -19,7 +19,7 @@ class DeviceMessages extends Migration
             $table->string('date');
             $table->string('station');
             $table->string('type');
-            $table->string('message');
+            $table->longText('message');
             $table->timestamps();
         });
     }

@@ -17,7 +17,7 @@ class CreateMeterValuesTable extends Migration
             $table->id();
             $table->integer('Connector_ID');
             $table->integer('CP_ID');
-            $table->dateTime('Date');
+            $table->string('Date');
             $table->string('Reservation_ID');
             $table->integer('Meter_Values');
             $table->timestamps();

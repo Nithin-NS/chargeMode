@@ -20,6 +20,8 @@ wss.on("connection", ws => {
 
     console.log('New Client Conncted..');
 
+    console.log(ws._socket.remoteAddress);
+
     ws.on("message", data => {
         // var msg = data;
         var msg = JSON.parse(data);
@@ -34,7 +36,12 @@ wss.on("connection", ws => {
                 console.log('boot');
                 BootNotification(msg);
                 break;
-
+                
+            case "StatusNotification":
+                console.log('StatusNotification');
+                StatusNotification(msg);
+                break;
+            
             case "Authorize":
                 console.log('authentication');
                 authentication(msg);
@@ -50,7 +57,7 @@ wss.on("connection", ws => {
                 MeterValues(msg);
                 break;
               
-            case "HeartBeatRequest":
+            case "Heartbeat":
                 console.log('HeartBeat');
                 HeartBeat(msg);
                 break;
@@ -63,6 +70,11 @@ wss.on("connection", ws => {
             case "RemoteStartRequest":
                 // console.log('RemoteStartRequest');
                 RemoteStartRequest(msg);
+                break;
+
+            case "SendRemoteStart":
+                // console.log('RemoteStartRequest');
+                SendRemoteStart(msg);
                 break;
               
             default:
@@ -96,7 +108,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("Bootnotification Request Inserted");
@@ -111,7 +123,7 @@ wss.on("connection", ws => {
                     var metadata = [
                         3,
                         uniqid,
-                        'BootNotificationResponse',
+                        // 'BootNotificationResponse',
                         {
                             currenTime: datetime,
                             interval: "15",
@@ -120,7 +132,7 @@ wss.on("connection", ws => {
                     ];
                     console.log(metadata);
 
-                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                             console.log("Bootnotification Responce(Rejected) Inserted");
@@ -136,7 +148,7 @@ wss.on("connection", ws => {
                     var metadata = [
                         3,
                         uniqid,
-                        'BootNotificationResponse',
+                        // 'BootNotificationResponse',
                         {
                             currenTime: datetime,
                             interval: "15",
@@ -145,7 +157,7 @@ wss.on("connection", ws => {
                     ];
                     console.log(metadata);
 
-                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                    var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                             console.log("Bootnotification Responce(Accepted) Inseted..");
@@ -156,10 +168,84 @@ wss.on("connection", ws => {
         });
     }//End of BootNotification
 
+    //StatusNotification
+    function StatusNotification(msg){
+        console.log('Inside StatusNotification');
+        console.log(msg);
+        var data = msg;
+
+        var uniqid = data[1];
+        var connectorId = data[3].connectorId;
+        var status = data[3].status;
+
+        var cp_name = "unknown";
+
+        var date = new Date();
+        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
+        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
+        var datetime = fullDate+' '+time;
+
+        var mysql = require('mysql');
+        var con = mysql.createConnection({
+            host: "localhost",
+            user: "ubuntu",
+            password: "admin@123",
+            database: "chargemode_websockets"
+        });
+
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','in','"+JSON.stringify(data,null, 2)+"')";
+            con.query(sql, function (err, result) {
+                if (err) throw err;
+            console.log("StatusNotification Request Inserted");
+        });
+
+        if(status === "Available"){
+            var metadata = [
+                3,
+                uniqid,
+                // 'StatusNotificationResponce',
+                {
+                    currenTime: datetime,
+                    status: 'Accepted',
+                }
+            ];
+            console.log(metadata);
+
+            var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                        console.log("Bootnotification Responce(Accepted) Inseted..");
+                    });
+
+                ws.send(JSON.stringify(metadata));
+
+        }else{
+            var metadata = [
+                3,
+                uniqid,
+                // 'StatusNotificationResponce',
+                {
+                    currenTime: datetime,
+                    status: 'Rejected',
+                }
+            ];
+            console.log(metadata);
+
+            var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+cp_name+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                con.query(sql, function (err, result) {
+                    if (err) throw err;
+                        console.log("Bootnotification Responce(Accepted) Inseted..");
+                    });
+
+            ws.send(JSON.stringify(metadata));
+        }
+    }
+    //End of StatusNotification
+
     //Authenticate Function
     function authentication(msg){
-        console.log('Inside Auth');
-        // console.log(msg);
+        console.log('Inside authentication');
+        console.log(msg);
         var data = msg;
         var idTag = data[3].idTag;
         var chargepoint = data[3].chargepoint;
@@ -181,7 +267,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("Authentication Request Inserted..");
@@ -196,7 +282,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    "AuthenticateResponse",
+                    // "AuthenticateResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -204,7 +290,7 @@ wss.on("connection", ws => {
                     }
                 ];
 
-                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                     console.log("Authentication responce(Invalid) Inserted..");
@@ -219,7 +305,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    "AuthenticateResponse",
+                    // "AuthenticateResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -227,7 +313,7 @@ wss.on("connection", ws => {
                     }
                 ];
 
-                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                     console.log("Authentication responce(Accepted) Inserted..");
@@ -255,7 +341,7 @@ wss.on("connection", ws => {
         var date = new Date();
         var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime1 = fullDate+' '+time;
+        var datetime = fullDate+' '+time;
 
         // console.log(datetime);
  
@@ -267,7 +353,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("StartTransaction Request Inserted..");
@@ -283,7 +369,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    "StartTransactionResponse",
+                    // "StartTransactionResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -292,7 +378,7 @@ wss.on("connection", ws => {
                     transactionId="2468"
                 ];
 
-                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                     console.log("StartTransaction Responce(Invalid) Inserted..");
@@ -311,7 +397,7 @@ wss.on("connection", ws => {
                 var metadata = [
                     3,
                     uniqid,
-                    "StartTransactionResponse",
+                    // "StartTransactionResponse",
                     {
                         expiryDate:"2021-3-8T3.00PM",
                         parentIdTag:"170443",
@@ -319,7 +405,7 @@ wss.on("connection", ws => {
                     },
                     transactionId="2468"
                 ];
-                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+                var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
                     con.query(sql, function (err, result) {
                         if (err) throw err;
                     console.log("StartTransaction Responce(Accepted) Inserted..");
@@ -350,7 +436,7 @@ wss.on("connection", ws => {
         var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
         var datetime = fullDate+' '+time;
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("MeterValues Request Inserted..");
@@ -366,13 +452,13 @@ wss.on("connection", ws => {
         var metadata = [
             3,
             uniqid,
-            "MeterValuesResponse",
+            // "MeterValuesResponse",
             {
                 status: 'success'
             }
         ];
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("MeterValues Responce Inserted..");
@@ -399,7 +485,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("HeartBeat Request Inserted..");
@@ -408,13 +494,13 @@ wss.on("connection", ws => {
         var metadata =  [
             3,
             uniqid,
-            "HeartBeatResponse",
+            // "HeartBeatResponse",
             {
                 currentTime: '02-04-21' 
             }
         ];
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(metadata,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("HeartBeat Request Inserted..");
@@ -447,7 +533,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("StopTransaction Request Inserted..");
@@ -462,7 +548,7 @@ wss.on("connection", ws => {
         var metadata = [
             3,
             uniqid,
-            "StopTransactionResponse",
+            // "StopTransactionResponse",
             {
                 expiryDate:"2021-3-8T3.00PM",
                 parentIdTag:"170443",
@@ -470,7 +556,7 @@ wss.on("connection", ws => {
             },
             2468,
         ];
-        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','out','"+JSON.stringify(data,null, 2)+"')";
+        var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+datetime+"','"+chargepoint+"','out','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
                 if (err) throw err;
             console.log("StopTransaction Request Inserted..");
@@ -480,20 +566,25 @@ wss.on("connection", ws => {
     }//End of Stop Transaction
 
     //remote start transaction
-    function RemoteStartRequest(msg){
+    function  SendRemoteStart(msg){
         var data = msg;
-        // console.log(data);
-        // var uniqid = data[1];
 
-        // var metadata =  [
-        //     3,
-        //     uniqid,
-        //     "HeartBeatResponse",
-        //     {
-        //         currentTime: '02-04-21' 
-        //     }
-        // ];
-        ws.send(JSON.stringify(data));
+        var uniqid = data[1];
+        var cp_name = data[3];
+        var idTag = data[4];
+
+        var metadata =  [
+            3,
+            uniqid,
+            {
+                chargepoint: cp_name,
+                idTag: idTag
+            }
+        ];
+
+        console.log(metadata);
+        
+        ws.send(JSON.stringify(metadata));
     }
 
     ws.on("close", () => {

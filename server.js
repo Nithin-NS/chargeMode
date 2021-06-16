@@ -24,8 +24,11 @@ wss.on("connection", ws => {
 
     console.log('New Client Conncted..');
 
+    console.log(ws._socket.remoteAddress);
+
     ws.on("message", data => {
         // var msg = data;
+
         var msg = JSON.parse(data);
 
         var title = msg[2];
@@ -165,6 +168,7 @@ wss.on("connection", ws => {
                     });
 
                     ws.send(JSON.stringify(metadata));
+                    console.log("Bootnotification has been send");
                 }
         });
     }//End of BootNotification

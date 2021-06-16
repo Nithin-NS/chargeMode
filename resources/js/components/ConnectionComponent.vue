@@ -290,7 +290,8 @@ export default {
             beatInterval: "",
             meterInterval: "",
             ws: null,
-            url: "ws://65.2.153.255:8082/",
+            // url: "ws://65.2.153.255:8082/",
+            url: "ws://localhost:8082/",
             e: "",
             val: ""
         };
@@ -301,6 +302,7 @@ export default {
 
         this.ws.addEventListener("open", () => {
             console.log("We are connected!..");
+            console.log("select_cp");
 
             // this.ws.send("Hey, How are you?");
             this.ws.addEventListener("message", e => {

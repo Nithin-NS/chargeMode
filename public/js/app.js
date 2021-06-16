@@ -2346,7 +2346,8 @@ __webpack_require__.r(__webpack_exports__);
       beatInterval: "",
       meterInterval: "",
       ws: null,
-      url: "ws://65.2.153.255:8082/",
+      // url: "ws://65.2.153.255:8082/",
+      url: "ws://localhost:8082/",
       e: "",
       val: ""
     };
@@ -2357,7 +2358,8 @@ __webpack_require__.r(__webpack_exports__);
     this.getChargepoints();
     this.ws = new WebSocket(this.url + this.select_cp);
     this.ws.addEventListener("open", function () {
-      console.log("We are connected!.."); // this.ws.send("Hey, How are you?");
+      console.log("We are connected!..");
+      console.log("select_cp"); // this.ws.send("Hey, How are you?");
 
       _this.ws.addEventListener("message", function (e) {
         var msg = JSON.parse(e.data);
@@ -2666,24 +2668,64 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
       messages: [],
-      msg: ""
+      msg: "",
+      timer: ""
     };
   },
-  mounted: function mounted() {
-    console.log("Messages mounted.");
+  mounted: function mounted() {// console.log("Messages mounted.");
   },
   created: function created() {
     this.getDeviceMessages();
+    this.timer = setInterval(this.getDeviceMessages, 1000);
   },
   methods: {
     getDeviceMessages: function getDeviceMessages() {
       axios.get("/getDeviceMessages").then(function (response) {
-        this.messages = response.data; // console.log(this.messages);
+        this.messages = response.data;
+        this.msg = ""; // console.log("Updating Messages");
       }.bind(this));
+    },
+    cancelAutoUpdate: function cancelAutoUpdate() {
+      clearInterval(this.timer);
+      console.log("Messages Clearing..");
+    },
+    beforeDestroy: function beforeDestroy() {
+      this.cancelAutoUpdate();
     },
     clearMessages: function clearMessages() {
       axios.get("/clearDeviceMessages").then(function (response) {
@@ -2978,7 +3020,9 @@ __webpack_require__.r(__webpack_exports__);
       error_msg: "",
       elementVisible: false,
       ws: null,
-      url: "ws://65.2.153.255:8082/"
+      url: "ws://65.2.153.255:8082/" // url: "ws://202.164.137.201:8080/"
+      // url: "ws://157.44.175.57:80/"
+
     };
   },
   created: function created() {
@@ -3011,7 +3055,8 @@ __webpack_require__.r(__webpack_exports__);
       }.bind(this));
     },
     remoteStart: function remoteStart(id) {
-      if (this.select_connector == "" || this.select_cp == "") {
+      // if (this.select_connector == "" || this.select_cp == "") {
+      if (this.select_cp == "") {
         // console.log("enter values");
         this.error_msg = "Enter Value";
         this.elementVisible = true;
@@ -39561,37 +39606,56 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { staticClass: "row" }, [
-    _c("div", { staticClass: "col-md-4" }, [
-      _c(
-        "button",
-        {
-          staticClass: "btn btn-success btn-sm",
-          attrs: { type: "submit", value: "Submit", id: "remoteStart" },
-          on: {
-            click: function($event) {
-              $event.preventDefault()
-              return _vm.clearMessages()
+  return _c("div", [
+    _c("div", { staticClass: "row mb-20" }, [
+      _c("div", { staticClass: "col-4" }, [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-outline-primary",
+            attrs: { type: "submit", value: "Submit", id: "remoteStart" },
+            on: {
+              click: function($event) {
+                $event.preventDefault()
+                return _vm.clearMessages()
+              }
             }
-          }
-        },
-        [_vm._v("\n            Clear Messages\n        ")]
-      )
-    ]),
-    _vm._v(" "),
-    _c("div", { staticClass: "col-md-8" }, [
-      _vm.msg
-        ? _c(
-            "div",
-            { staticClass: "alert alert-primary", attrs: { role: "alert" } },
-            [_vm._v("\n            " + _vm._s(_vm.msg) + "\n        ")]
-          )
-        : _vm._e(),
+          },
+          [
+            _c("i", {
+              staticClass: "icon fa-plus",
+              attrs: { "aria-hidden": "true" }
+            }),
+            _vm._v(" "),
+            _c("span", { staticClass: "text hidden-sm-down" }, [
+              _vm._v("Clear Messages")
+            ])
+          ]
+        )
+      ]),
       _vm._v(" "),
-      _c("span", {})
+      _c("div", { staticClass: "col-md-8", staticStyle: { margin: "0" } }, [
+        _vm.msg
+          ? _c(
+              "div",
+              {
+                staticClass: "alert alert-primary",
+                staticStyle: { margin: "0", padding: "6px" },
+                attrs: { role: "alert" }
+              },
+              [
+                _vm._v(
+                  "\n                " + _vm._s(_vm.msg) + "\n            "
+                )
+              ]
+            )
+          : _vm._e(),
+        _vm._v(" "),
+        _c("span", {})
+      ])
     ]),
     _vm._v(" "),
-    _c("div", { staticClass: "col-12" }, [
+    _c("div", { staticClass: "card" }, [
       _c("table", { staticClass: "table table-bordered" }, [
         _vm._m(0),
         _vm._v(" "),
@@ -39599,41 +39663,65 @@ var render = function() {
           "tbody",
           _vm._l(_vm.messages, function(message) {
             return _c("tr", { key: message["id"] }, [
-              _c("td", [_vm._v(_vm._s(message["uid"]))]),
+              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
+                _vm._v(
+                  "\n                        " +
+                    _vm._s(message["uid"]) +
+                    "\n                    "
+                )
+              ]),
               _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(message["date"]))]),
+              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
+                _vm._v(
+                  "\n                        " +
+                    _vm._s(message["date"]) +
+                    "\n                    "
+                )
+              ]),
               _vm._v(" "),
-              _c("td", [_c("span", {}, [_vm._v(_vm._s(message["station"]))])]),
+              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
+                _c("span", {}, [_vm._v(_vm._s(message["station"]))])
+              ]),
               _vm._v(" "),
               message["type"] === "in"
-                ? _c("td", [
-                    _c(
-                      "span",
-                      {
-                        staticClass: "badge",
-                        staticStyle: {
-                          "background-color": "green",
-                          color: "white"
-                        }
-                      },
-                      [_vm._v(_vm._s(message["type"]))]
-                    )
-                  ])
-                : _c("td", [
-                    _c(
-                      "span",
-                      {
-                        staticClass: "badge",
-                        staticStyle: {
-                          "background-color": "red",
-                          color: "white"
-                        }
-                      },
-                      [_vm._v(_vm._s(message["type"]))]
-                    )
-                  ]),
+                ? _c(
+                    "td",
+                    { staticStyle: { padding: "24px 8px !important" } },
+                    [
+                      _c(
+                        "span",
+                        {
+                          staticClass: "badge",
+                          staticStyle: {
+                            "background-color": "green",
+                            color: "white"
+                          }
+                        },
+                        [_vm._v(_vm._s(message["type"]))]
+                      )
+                    ]
+                  )
+                : _c(
+                    "td",
+                    { staticStyle: { padding: "24px 8px !important" } },
+                    [
+                      _c(
+                        "span",
+                        {
+                          staticClass: "badge",
+                          staticStyle: {
+                            "background-color": "#eb6709",
+                            color: "white"
+                          }
+                        },
+                        [_vm._v(_vm._s(message["type"]))]
+                      )
+                    ]
+                  ),
               _vm._v(" "),
-              _c("td", [_c("span", [_vm._v(_vm._s(message["message"]))])])
+              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
+                _c("span", [_vm._v(_vm._s(message["message"]))])
+              ])
             ])
           }),
           0
