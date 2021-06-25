@@ -237,16 +237,14 @@ export default {
             idTag: "",
             error_msg: "",
             elementVisible: false,
-            ws: null,
-            url: "ws://65.2.153.255:8082/"
-            // url: "ws://202.164.137.201:8080/"
-            // url: "ws://157.44.175.57:80/"
+            ws: null
+            // url: "ws://65.2.153.255:8082/"
         };
     },
     created() {
         this.getUserDetails();
         this.findChargePoints();
-        this.ws = new WebSocket(this.url);
+        // this.ws = new WebSocket(this.url);
 
         // this.ws.addEventListener("open", () => {
         //     console.log("We are connected!..");
@@ -297,16 +295,19 @@ export default {
                     $("#error_msg").alert("close");
                 }, 3000);
             } else {
-                console.log("ok");
                 var id = id;
                 axios
-                    .post("/remoteStart/" + id, {
+                    .get("http://localhost:8000/api/remoteStart/" + id, {
                         con_id: this.select_connector,
                         cp_id: this.select_cp
                     })
                     .then(
-                        function(response) {
-                            if (response.data) {
+                        function(res) {
+                            if (res.status == 200) {
+                                console.log(
+                                    "Ok!, server status code is",
+                                    res.status
+                                );
                                 document.getElementById(
                                     "remoteStart_" + id
                                 ).style.display = "none";
@@ -315,10 +316,8 @@ export default {
                                 ).style.display = "inline-block";
                                 $("#transactionModal_" + id).modal("hide");
                                 $(".modal-backdrop").remove();
-                                //sending remote start
-                                this.ws.send(JSON.stringify(response.data));
                             } else {
-                                console.log("No Data");
+                                console.log("server status error", res.status);
                             }
                         }.bind(this)
                     )
@@ -331,9 +330,32 @@ export default {
         remoteStop: function(id) {
             var id = id;
             console.log(id);
-            document.getElementById("remoteStart_" + id).style.display =
-                "inline-block";
-            document.getElementById("remoteStop_" + id).style.display = "none";
+            axios
+                .get("http://localhost:8000/api/remoteStop/" + id, {
+                    con_id: this.select_connector,
+                    cp_id: this.select_cp
+                })
+                .then(
+                    function(res) {
+                        if (res.status == 200) {
+                            console.log(
+                                "Ok!, server status code is",
+                                res.status
+                            );
+                            document.getElementById(
+                                "remoteStart_" + id
+                            ).style.display = "inline-block";
+                            document.getElementById(
+                                "remoteStop_" + id
+                            ).style.display = "none";
+                        } else {
+                            console.log("server status error", res.status);
+                        }
+                    }.bind(this)
+                )
+                .catch(error => {
+                    console.log(error.response);
+                });
         }
     }
 };

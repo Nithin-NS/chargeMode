@@ -51,9 +51,8 @@
       <!-- Navbar Toolbar Right -->
       <ul class="nav navbar-toolbar navbar-right navbar-toolbar-right">
 
-        @if(Auth::guard('admin')->check())
-
         <li class="nav-item dropdown">
+          @if(Auth::guard('admin')->check())
           <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
              <span class="caret">{{Auth::guard('admin')->user()->name}}</span>
           </a>
@@ -68,29 +67,27 @@
               @csrf
             </form>
           </div>
-        </li>
- 
-        @elseif(Auth::guard('web')->check())
 
-        <li class="nav-item dropdown">
+          @elseif(Auth::guard('web')->check())
+
           <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-             <span class="caret">{{Auth::guard('web')->user()->name}}</span>
-          </a>
+            <span class="caret">{{Auth::guard('web')->user()->name}}</span>
+         </a>
 
-          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-            <a class="dropdown-item" href="{{ route('user.logout') }}"
-               onclick="event.preventDefault(); document.getElementById('form-logout-form').submit();">
-              {{ __('Logout') }}
-            </a>
+         <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+           <a class="dropdown-item" href="{{ route('user.logout') }}"
+              onclick="event.preventDefault(); document.getElementById('form-logout-form').submit();">
+             {{ __('Logout') }}
+           </a>
 
-            <form id="form-logout-form" action="{{ route('user.logout') }}" method="GET" style="display: none;">
-              @csrf
-            </form>
-          </div>
+           <form id="form-logout-form" action="{{ route('user.logout') }}" method="GET" style="display: none;">
+             @csrf
+           </form>
+         </div>
+
+         @endif
+
         </li>
-           
-        @endif
-
       </ul>
       <!-- End Navbar Toolbar Right -->
     </div>

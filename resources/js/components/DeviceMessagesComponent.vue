@@ -24,16 +24,16 @@
                     @click.prevent="clearMessages()"
                     class="btn btn-outline-primary"
                 >
-                    <i class="icon fa-plus" aria-hidden="true"></i>
+                    <i class="icon fa-times" aria-hidden="true"></i>
                     <span class="text hidden-sm-down">Clear Messages</span>
                 </button>
             </div>
             <div class="col-md-8" style="margin: 0;">
                 <div
-                    class="alert alert-primary"
+                    class="alert alert-success"
                     role="alert"
                     v-if="msg"
-                    style="margin: 0;padding: 6px;"
+                    style="margin: 0;padding: 6px 16px;"
                 >
                     {{ msg }}
                 </div>
@@ -54,13 +54,13 @@
                 </thead>
                 <tbody>
                     <tr :key="message['id']" v-for="message in messages">
-                        <td style="padding: 24px 8px !important;">
-                            {{ message["uid"] }}
+                        <td>
+                            <span>{{ message["uid"] }}</span>
                         </td>
-                        <td style="padding: 24px 8px !important;">
-                            {{ message["date"] }}
+                        <td>
+                            <span>{{ message["date"] }}</span>
                         </td>
-                        <td style="padding: 24px 8px !important;">
+                        <td>
                             <span class="">{{ message["station"] }}</span>
                         </td>
                         <!-- <td>
@@ -70,24 +70,21 @@
                                         >Active</span
                                     >
                                 </td> -->
-                        <td
-                            v-if="message['type'] === 'in'"
-                            style="padding: 24px 8px !important;"
-                        >
+                        <td v-if="message['type'] === 'in'">
                             <span
                                 class="badge"
                                 style="background-color: green;color:white;"
                                 >{{ message["type"] }}</span
                             >
                         </td>
-                        <td v-else style="padding: 24px 8px !important;">
+                        <td v-else>
                             <span
                                 class="badge"
                                 style="background-color: #eb6709;color:white;"
                                 >{{ message["type"] }}</span
                             >
                         </td>
-                        <td style="padding: 24px 8px !important;">
+                        <td>
                             <span>{{ message["message"] }}</span>
                         </td>
                     </tr>

@@ -2363,6 +2363,7 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.ws.addEventListener("message", function (e) {
         var msg = JSON.parse(e.data);
+        console.log(msg);
         var unique_id = msg[1]; // console.log(unique_id);
         // console.log(msg[2]);
 
@@ -2600,9 +2601,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-//
-//
-//
 //
 //
 //
@@ -3019,16 +3017,14 @@ __webpack_require__.r(__webpack_exports__);
       idTag: "",
       error_msg: "",
       elementVisible: false,
-      ws: null,
-      url: "ws://65.2.153.255:8082/" // url: "ws://202.164.137.201:8080/"
-      // url: "ws://157.44.175.57:80/"
+      ws: null // url: "ws://65.2.153.255:8082/"
 
     };
   },
   created: function created() {
     this.getUserDetails();
-    this.findChargePoints();
-    this.ws = new WebSocket(this.url); // this.ws.addEventListener("open", () => {
+    this.findChargePoints(); // this.ws = new WebSocket(this.url);
+    // this.ws.addEventListener("open", () => {
     //     console.log("We are connected!..");
     //     this.ws.addEventListener("message", e => {});
     // });
@@ -3065,21 +3061,19 @@ __webpack_require__.r(__webpack_exports__);
           $("#error_msg").alert("close");
         }, 3000);
       } else {
-        console.log("ok");
         var id = id;
-        axios.post("/remoteStart/" + id, {
+        axios.get("http://localhost:8000/api/remoteStart/" + id, {
           con_id: this.select_connector,
           cp_id: this.select_cp
-        }).then(function (response) {
-          if (response.data) {
+        }).then(function (res) {
+          if (res.status == 200) {
+            console.log("Ok!, server status code is", res.status);
             document.getElementById("remoteStart_" + id).style.display = "none";
             document.getElementById("remoteStop_" + id).style.display = "inline-block";
             $("#transactionModal_" + id).modal("hide");
-            $(".modal-backdrop").remove(); //sending remote start
-
-            this.ws.send(JSON.stringify(response.data));
+            $(".modal-backdrop").remove();
           } else {
-            console.log("No Data");
+            console.log("server status error", res.status);
           }
         }.bind(this))["catch"](function (error) {
           console.log(error.response);
@@ -3089,8 +3083,20 @@ __webpack_require__.r(__webpack_exports__);
     remoteStop: function remoteStop(id) {
       var id = id;
       console.log(id);
-      document.getElementById("remoteStart_" + id).style.display = "inline-block";
-      document.getElementById("remoteStop_" + id).style.display = "none";
+      axios.get("http://localhost:8000/api/remoteStop/" + id, {
+        con_id: this.select_connector,
+        cp_id: this.select_cp
+      }).then(function (res) {
+        if (res.status == 200) {
+          console.log("Ok!, server status code is", res.status);
+          document.getElementById("remoteStart_" + id).style.display = "inline-block";
+          document.getElementById("remoteStop_" + id).style.display = "none";
+        } else {
+          console.log("server status error", res.status);
+        }
+      }.bind(this))["catch"](function (error) {
+        console.log(error.response);
+      });
     }
   }
 });
@@ -39623,7 +39629,7 @@ var render = function() {
           },
           [
             _c("i", {
-              staticClass: "icon fa-plus",
+              staticClass: "icon fa-times",
               attrs: { "aria-hidden": "true" }
             }),
             _vm._v(" "),
@@ -39639,8 +39645,8 @@ var render = function() {
           ? _c(
               "div",
               {
-                staticClass: "alert alert-primary",
-                staticStyle: { margin: "0", padding: "6px" },
+                staticClass: "alert alert-success",
+                staticStyle: { margin: "0", padding: "6px 16px" },
                 attrs: { role: "alert" }
               },
               [
@@ -39663,65 +39669,41 @@ var render = function() {
           "tbody",
           _vm._l(_vm.messages, function(message) {
             return _c("tr", { key: message["id"] }, [
-              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
-                _vm._v(
-                  "\n                        " +
-                    _vm._s(message["uid"]) +
-                    "\n                    "
-                )
-              ]),
+              _c("td", [_c("span", [_vm._v(_vm._s(message["uid"]))])]),
               _vm._v(" "),
-              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
-                _vm._v(
-                  "\n                        " +
-                    _vm._s(message["date"]) +
-                    "\n                    "
-                )
-              ]),
+              _c("td", [_c("span", [_vm._v(_vm._s(message["date"]))])]),
               _vm._v(" "),
-              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
-                _c("span", {}, [_vm._v(_vm._s(message["station"]))])
-              ]),
+              _c("td", [_c("span", {}, [_vm._v(_vm._s(message["station"]))])]),
               _vm._v(" "),
               message["type"] === "in"
-                ? _c(
-                    "td",
-                    { staticStyle: { padding: "24px 8px !important" } },
-                    [
-                      _c(
-                        "span",
-                        {
-                          staticClass: "badge",
-                          staticStyle: {
-                            "background-color": "green",
-                            color: "white"
-                          }
-                        },
-                        [_vm._v(_vm._s(message["type"]))]
-                      )
-                    ]
-                  )
-                : _c(
-                    "td",
-                    { staticStyle: { padding: "24px 8px !important" } },
-                    [
-                      _c(
-                        "span",
-                        {
-                          staticClass: "badge",
-                          staticStyle: {
-                            "background-color": "#eb6709",
-                            color: "white"
-                          }
-                        },
-                        [_vm._v(_vm._s(message["type"]))]
-                      )
-                    ]
-                  ),
+                ? _c("td", [
+                    _c(
+                      "span",
+                      {
+                        staticClass: "badge",
+                        staticStyle: {
+                          "background-color": "green",
+                          color: "white"
+                        }
+                      },
+                      [_vm._v(_vm._s(message["type"]))]
+                    )
+                  ])
+                : _c("td", [
+                    _c(
+                      "span",
+                      {
+                        staticClass: "badge",
+                        staticStyle: {
+                          "background-color": "#eb6709",
+                          color: "white"
+                        }
+                      },
+                      [_vm._v(_vm._s(message["type"]))]
+                    )
+                  ]),
               _vm._v(" "),
-              _c("td", { staticStyle: { padding: "24px 8px !important" } }, [
-                _c("span", [_vm._v(_vm._s(message["message"]))])
-              ])
+              _c("td", [_c("span", [_vm._v(_vm._s(message["message"]))])])
             ])
           }),
           0

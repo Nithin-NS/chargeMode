@@ -1,6 +1,9 @@
 const WebSocket = require('ws');
 
-const remotejs = require('./remote.js');
+var remotestartcontroller = require('./api/controller/remotestartcontroller');
+var remotestopcontroller = require('./api/controller/remotestopcontroller');
+
+const cors = require('cors');
 
 var fs = require('fs');
 
@@ -12,9 +15,40 @@ const app = express();
 
 const http = require('http');
 
-const port = 8000;
+const port1 = process.env.PORT || 8000;
 
 app.use(express.urlencoded({ extended: true }));
+
+//setting options for cors
+var corsOptions = {
+    origin: 'http://127.0.0.1:8000',
+    optionsSuccessStatus: 200 // For legacy browser support
+}
+app.use(cors(corsOptions));
+
+// function to handle remotestart
+// function remotestart(res){
+//     res.send('From Remotestart');
+// }
+
+//API for Remotestart and remotestop
+app.get('/api/remotestart/:id', cors(), (req, res) => {
+    //Call Function inside server
+    // remotestart(res);
+
+    //call function on controller.js
+    remotestartcontroller.remotestart(res);
+})
+
+app.get('/api/remotestop/:id', cors(), (req, res) => {
+    //Call Function inside server
+    // remotestart(res);
+
+    //call function on controller.js
+    remotestopcontroller.remotestop(res);
+})
+
+app.listen(port1, () => console.log(`Listening on ${port1}`))
 
 const server = http.createServer(app);
 
@@ -38,8 +72,8 @@ wss.on("connection", ws => {
         switch (title) {
 
             case "BootNotification":
-                console.log('boot');
-                BootNotification(msg);
+                    console.log('boot');
+                    BootNotification(msg);
                 break;
 
             case "Authorize":

@@ -307,7 +307,7 @@ export default {
             // this.ws.send("Hey, How are you?");
             this.ws.addEventListener("message", e => {
                 var msg = JSON.parse(e.data);
-
+                console.log(msg);
                 var unique_id = msg[1];
                 // console.log(unique_id);
                 // console.log(msg[2]);
