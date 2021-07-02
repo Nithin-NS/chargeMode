@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\ChargePoint;
@@ -17,12 +18,12 @@ class ClientController extends Controller
     }
 
     public function getConnectors(Request $request)
-    { 
-        $connectors = ChargepiontConnector::leftJoin('connectors','chargepoint_connector.connector_id', '=', 'connectors.id')
-                            ->select('connectors.id','connectors.Type')
-                            ->where('chargepoint_id', $request->cp_id)
-                            ->get();
-        
+    {
+        $connectors = ChargepiontConnector::leftJoin('connectors', 'chargepoint_connector.connector_id', '=', 'connectors.id')
+            ->select('connectors.id', 'connectors.Type')
+            ->where('chargepoint_id', $request->cp_id)
+            ->get();
+
         return response()->json($connectors);
     }
 
@@ -60,7 +61,7 @@ class ClientController extends Controller
         // event(new BootNotification($data));
         return $data;
     }
-    
+
     public function authenticate(Request $request)
     {
         $cp_id = $request->get('cp_id');
@@ -68,7 +69,7 @@ class ClientController extends Controller
         $tag = $request->get('id_tag');
         $con_id = $request->get('connector');
         // $connector = ConnectorType::where('id', $con_id)->first()->Type;
-        
+
         $numbers = '0123456789';
 
         // generate a pin based on 2 * 7 digits + a random character
@@ -83,11 +84,11 @@ class ClientController extends Controller
             2,
             $UniqueId,
             'Authorize',
-                [
-                    'idTag' => $tag,
-                    'chargepoint' => $chargepoint,
-                    'connector' => $con_id
-                ]
+            [
+                'idTag' => $tag,
+                'chargepoint' => $chargepoint,
+                'connector' => $con_id
+            ]
         ];
         $data = json_encode($metadata);
         // broadcast(new BootNotification($data,$cp_id));
@@ -117,14 +118,14 @@ class ClientController extends Controller
             2,
             $UniqueId,
             'StartTransactionRequest',
-                [
-                    'chargepoint' => $cp_id,
-                    'connectorId' => $con_id,
-                    'idTag' => $id_tag,
-                    'meterStart' => '1230',
-                    'reservationId' => $reservationId,
-                    'timestamp' => '12.12',
-                ]
+            [
+                'chargepoint' => $cp_id,
+                'connectorId' => $con_id,
+                'idTag' => $id_tag,
+                'meterStart' => '1230',
+                'reservationId' => $reservationId,
+                'timestamp' => '12.12',
+            ]
         ];
 
         $data = json_encode($metadata);
@@ -158,14 +159,14 @@ class ClientController extends Controller
                 'connectorId' => $con_id,
                 'transactionId' => "94",
                 'meterValue' => [
-                'timeStamp' => "02-10-2020",
-                'stampledValue' => [
-                    'context' => "other",
-                    'format' => "signedData",
-                    'measurand' => "Power offered",
-                    'phase' => "LI",
-                    'location' => "EV",
-                    'unit' => "Kwh"
+                    'timeStamp' => "02-10-2020",
+                    'stampledValue' => [
+                        'context' => "other",
+                        'format' => "signedData",
+                        'measurand' => "Power offered",
+                        'phase' => "LI",
+                        'location' => "EV",
+                        'unit' => "Kwh"
                     ]
                 ]
             ]
@@ -175,7 +176,8 @@ class ClientController extends Controller
         return $data;
     }
 
-    public function heartBeat(Request $request){
+    public function heartBeat(Request $request)
+    {
         $cp_id = $request->get('cp_id');
         $con_id = $request->get('connector');
         $chargepoint = ChargePoint::where('CP_ID', $cp_id)->first()->CP_Name;
@@ -200,14 +202,14 @@ class ClientController extends Controller
                 'connectorId' => $con_id,
                 'transactionId' => "94",
                 'meterValue' => [
-                'timeStamp' => "02-10-2020",
-                'stampledValue' => [
-                    'context' => "other",
-                    'format' => "signedData",
-                    'measurand' => "Power offered",
-                    'phase' => "LI",
-                    'location' => "EV",
-                    'unit' => "Kwh"
+                    'timeStamp' => "02-10-2020",
+                    'stampledValue' => [
+                        'context' => "other",
+                        'format' => "signedData",
+                        'measurand' => "Power offered",
+                        'phase' => "LI",
+                        'location' => "EV",
+                        'unit' => "Kwh"
                     ]
                 ]
             ]
@@ -239,24 +241,24 @@ class ClientController extends Controller
             $UniqueId,
             'StopTransactionRequest',
             [
-                    'chargepoint' => $cp_id,
-                    'connectorId' => $con_id,
-                    'idTag' => $id_tag,
-                    'meterStop' => '1600',
-                    'transactionId' => '1985',
-                    'reason' => 'Emergency Stop',
-                    'transactionData' => [
-                        'timeStamp' => "02-10-2020",
-                        'stampledValue' => [
-                            'context' => "other",
-                            'format' => "signedData",
-'                            measurand' => "Power offered",
-                            'phase' => "LI",
-                            'location' => "EV",
-                            'unit' > "Kwh"
+                'chargepoint' => $cp_id,
+                'connectorId' => $con_id,
+                'idTag' => $id_tag,
+                'meterStop' => '1600',
+                'transactionId' => '1985',
+                'reason' => 'Emergency Stop',
+                'transactionData' => [
+                    'timeStamp' => "02-10-2020",
+                    'stampledValue' => [
+                        'context' => "other",
+                        'format' => "signedData",
+                        '                            measurand' => "Power offered",
+                        'phase' => "LI",
+                        'location' => "EV",
+                        'unit' > "Kwh"
                     ]
                 ]
-            ]   
+            ]
         ];
 
         $data = json_encode($metadata);

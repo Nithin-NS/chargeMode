@@ -45,7 +45,8 @@
                 </thead>
                 @foreach($data as $key => $value)
                 <tr>
-                    <td>{{$key+1}}</td>
+                    {{-- <td>{{$key+1}}</td> --}}
+                    <td>{{$value->CP_ID}}</td>
                     <td>{{ $value->CP_Name}}</td>
                     <td>{{ $value->CP_State}}</td>
                     <td>{{$value->CP_District}}</td>

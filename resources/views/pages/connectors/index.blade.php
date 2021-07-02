@@ -39,7 +39,8 @@
      </thead>
         @foreach($data as $key => $value)
         <tr>
-            <td>{{$key+1}}</td>
+            {{-- <td>{{$key+1}}</td> --}}
+            <td>{{$value->id}}</td>
             <td>{{ $value->Type }}</td>
             <td>{{ $value->Remarks }}</td>
             <td class="text-center"><a href="connector/edit/{{ $value->id }}" data-toggle="tooltip" title="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a></td>

@@ -2,6 +2,7 @@ const WebSocket = require('ws');
 
 var remotestartcontroller = require('./api/controller/remotestartcontroller');
 var remotestopcontroller = require('./api/controller/remotestopcontroller');
+var wss = require('./api/websocket/websocket');
 
 const cors = require('cors');
 
@@ -14,6 +15,10 @@ const express = require('express');
 const app = express();
 
 const http = require('http');
+
+var moment = require('moment');
+
+const format = "MM/DD/YYYY hh:mm:ss A";
 
 const port1 = process.env.PORT || 8000;
 
@@ -50,15 +55,17 @@ app.get('/api/remotestop/:id', cors(), (req, res) => {
 
 app.listen(port1, () => console.log(`Listening on ${port1}`))
 
-const server = http.createServer(app);
+// const server = http.createServer(app);
 
-const wss = new WebSocket.Server({ port: 8082 });
+// const wss = new WebSocket.Server({ port: 8082 });
 
-wss.on("connection", ws => {
+wss.on("connection", function connection(ws, req) {
 
     console.log('New Client Conncted..');
 
-    console.log(ws._socket.remoteAddress);
+    const ip = req.socket.remoteAddress;
+
+    console.log(ip);
 
     ws.on("message", data => {
         // var msg = data;
@@ -124,19 +131,7 @@ wss.on("connection", ws => {
         var uniqid = data[1];
         var cpstatus = "0";
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
-
-        //setting device message to save in json
-        var json_msg = {
-            'id': uniqid,
-            'date': date,
-            'station': cp_name,
-            'type': "in",
-            'message': data
-        };
+        var date = moment().format(format); 
 
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -163,7 +158,7 @@ wss.on("connection", ws => {
                         uniqid,
                         'BootNotificationResponse',
                         {
-                            currenTime: datetime,
+                            currenTime: date,
                             interval: "15",
                             status: 'Rejected',
                         }
@@ -188,7 +183,7 @@ wss.on("connection", ws => {
                         uniqid,
                         'BootNotificationResponse',
                         {
-                            currenTime: datetime,
+                            currenTime: date,
                             interval: "15",
                             status: 'Accepted'
                         }
@@ -217,12 +212,7 @@ wss.on("connection", ws => {
         var connector = data[3].connector;
         var uniqid = data[1];
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
-        
-        console.log(idTag + ' | ' + chargepoint + ' | ' + connector);
+        var date = moment().format(format); 
 
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -303,12 +293,7 @@ wss.on("connection", ws => {
         var reservationId = data[3].reservationId;
         var uniqid = data[1];
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime1 = fullDate+' '+time;
-
-        // console.log(datetime);
+        var date = moment().format(format);
  
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -353,7 +338,7 @@ wss.on("connection", ws => {
             else{
                 console.log('Accepted')
                 
-                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start) VALUES ('"+connectorid+"','"+chargepoint+"','3459','170443','235265','"+datetime1+"','45')";
+                var sql = "INSERT INTO transactions (Connector_ID,CP_ID,CS_ID,User_ID,Reservation_ID,Trans_DateTime,Trans_Meter_Start) VALUES ('"+connectorid+"','"+chargepoint+"','3459','170443','235265','"+date+"','45')";
                 con.query(sql, function (err, result) {
                     if (err) throw err;
                     console.log("transactiondata inserted");
@@ -396,10 +381,7 @@ wss.on("connection", ws => {
             database: "chargemode_websockets"
         });
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
+        var date = moment().format(format);
 
         var sql = "INSERT INTO device_messages (uid,date,station,type,message) VALUES ('"+uniqid+"','"+date+"','"+chargepoint+"','in','"+JSON.stringify(data,null, 2)+"')";
             con.query(sql, function (err, result) {
@@ -408,7 +390,7 @@ wss.on("connection", ws => {
         });
 
         //Insert a record in the "metervalue" table:
-        var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+datetime+"','235265','53')";
+        var sql = "INSERT INTO meter_values (Connector_ID,CP_ID,Date,Reservation_ID,Meter_Values) VALUES ('"+connectorId+"','"+chargepoint+"','"+date+"','235265','53')";
         con.query(sql, function (err, result) {
             if (err) throw err;
             console.log("metervalue record inserted");
@@ -437,10 +419,7 @@ wss.on("connection", ws => {
         var uniqid = data[1];
         var chargepoint = 'unknown';
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
+        var date = moment().format(format);
 
         var mysql = require('mysql');
         var con = mysql.createConnection({
@@ -485,10 +464,7 @@ wss.on("connection", ws => {
         var meterStop = data[3].meterStop;
         var uniqid = data[1];
 
-        var date = new Date();
-        var fullDate = date.getDate()+'-'+(date.getMonth()+1)+'-'+date.getFullYear();
-        var time = date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds();
-        var datetime = fullDate+' '+time;
+        var date = moment().format(format);
  
         var mysql = require('mysql');
         var con = mysql.createConnection({

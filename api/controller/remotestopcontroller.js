@@ -25,12 +25,8 @@ exports.remotestop = (res) => {
             var metadata = [
                 2,
                 '12365987',
-                // 'RemoteStartRequest',
                 {
-                    chargepoint: 'CP01',
-                    connectorId: '01',
                     idTag: '125',
-                    reservationId: '123456',
                     transactionId: '1000',
                     timestamp: '12.12'
                 }

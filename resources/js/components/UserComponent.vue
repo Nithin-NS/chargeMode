@@ -298,6 +298,7 @@ export default {
                 var id = id;
                 axios
                     .get("http://localhost:8000/api/remoteStart/" + id, {
+                        // .get("http://65.2.153.255:8000/api/remoteStart/" + id, {
                         con_id: this.select_connector,
                         cp_id: this.select_cp
                     })
@@ -331,7 +332,8 @@ export default {
             var id = id;
             console.log(id);
             axios
-                .get("http://localhost:8000/api/remoteStop/" + id, {
+                // .get("http://65.2.153.255:8000/api/remoteStop/" + id, {
+                .get("http://127.0.0.1:8000/api/remoteStop/" + id, {
                     con_id: this.select_connector,
                     cp_id: this.select_cp
                 })
